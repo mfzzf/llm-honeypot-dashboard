@@ -49,7 +49,7 @@
 - Node.js 16+
 - 已配置的Elasticsearch实例 (7.x或更高版本)
 
-### 常规安装步骤
+### 安装步骤
 
 1. 克隆仓库
 ```bash
@@ -83,52 +83,6 @@ npm run dev
 5. 构建生产版本
 ```bash
 npm run build
-```
-
-### Docker部署
-
-本项目支持使用Docker进行部署，提供了Dockerfile和docker-compose.yml文件。
-
-#### 使用Docker Compose部署（推荐）
-
-1. 确保安装了Docker和Docker Compose
-2. 克隆仓库并进入项目目录
-3. 通过以下命令启动服务：
-
-```bash
-docker-compose up -d
-```
-
-这将同时启动应用服务和Elasticsearch服务。首次启动可能需要几分钟时间。
-
-4. 访问 http://localhost:3001 查看应用
-
-#### 环境变量配置
-
-在docker-compose.yml中可以配置以下环境变量：
-
-```
-NODE_ENV: 运行环境 (production/development)
-PORT: 应用端口
-ELASTIC_URL: Elasticsearch服务地址
-ELASTIC_USERNAME: Elasticsearch用户名
-ELASTIC_PASSWORD: Elasticsearch密码
-```
-
-#### 单独构建Docker镜像
-
-如果需要单独构建和运行Docker镜像：
-
-```bash
-# 构建镜像
-docker build -t llm-honeypot-dashboard .
-
-# 运行容器
-docker run -p 3001:3001 \
-  -e ELASTIC_URL=http://your-elasticsearch-host:9200 \
-  -e ELASTIC_USERNAME=your-username \
-  -e ELASTIC_PASSWORD=your-password \
-  llm-honeypot-dashboard
 ```
 
 ## 使用方法
