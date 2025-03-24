@@ -28,7 +28,7 @@ const Header = () => {
 
   return (
     <AntHeader className="site-layout-background" style={headerStyle}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px', height: '48px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 12px', height: '48px' }}>
         <Title level={4} style={{ margin: 0, marginRight: 12, fontSize: '16px' }}>
           {pageTitle}
         </Title>

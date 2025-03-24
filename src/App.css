@@ -11,7 +11,7 @@ body {
 .site-layout-background {
   background: #fff;
   padding: 0;
-  min-height: 360px;
+  min-height: 48px;
   margin-top: 0;
 }
 
@@ -20,14 +20,7 @@ body {
   z-index: 10;
 }
 
-.ant-layout-header {
-  background: #fff;
-  padding: 0;
-  height: 48px;
-  line-height: 48px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  
-}
+
 
 .logo-container {
   height: 48px;
@@ -250,6 +243,7 @@ pre {
 /* 直接针对ant-layout组件和header组件的全局样式覆盖 */
 .ant-layout {
   background: #fff !important;
+
   margin: 0 !important;
   padding: 0 !important;
 }

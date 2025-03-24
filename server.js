@@ -4,23 +4,26 @@ const { Client } = require('@elastic/elasticsearch');
 const bodyParser = require('body-parser');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // 配置跨域
 app.use(cors());
 app.use(bodyParser.json());
 
-// Elasticsearch配置
+// 从环境变量获取Elasticsearch配置
 const elasticConfig = {
-  node: 'http://10.255.248.65:9200',
+  node: process.env.ELASTIC_URL || 'http://10.255.248.65:9200',
   auth: {
-    username: 'elastic',
-    password: 'H3JIfzF2Ic*dbRj4c5Kd'
+    username: process.env.ELASTIC_USERNAME || 'elastic',
+    password: process.env.ELASTIC_PASSWORD || 'H3JIfzF2Ic*dbRj4c5Kd'
   }
 };
 
 // 创建Elasticsearch客户端
 const client = new Client(elasticConfig);
+
+// 静态文件服务
+app.use(express.static('dist'));
 
 // 健康检查路由
 app.get('/api/health', async (req, res) => {
