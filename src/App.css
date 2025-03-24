@@ -1,0 +1,304 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5;
+}
+
+.site-layout-background {
+  background: #fff;
+  padding: 0;
+  min-height: 360px;
+  margin-top: 0;
+}
+
+.ant-layout-sider {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.ant-layout-header {
+  background: #fff;
+  padding: 0;
+  height: 48px;
+  line-height: 48px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  
+}
+
+.logo-container {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #001529;
+  margin: 0;
+}
+
+.logo-text {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-container {
+  margin-bottom: 20px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* 仪表盘样式 */
+.dashboard-container {
+  padding: 0;
+  margin-top: 0;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-top: 16px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+.ant-card {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-statistic-title {
+  color: #666;
+}
+
+.ant-statistic-content {
+  color: #1890ff;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header .ant-picker {
+    margin-top: 16px;
+    width: 100%;
+  }
+  
+  .ant-col {
+    width: 100%;
+  }
+}
+
+/* 日志页面样式 */
+.llm-logs-container,
+.honeypot-logs-container {
+  padding: 0 16px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-top: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+}
+
+.detail-table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.detail-table tr td {
+  padding: 4px 0;
+  vertical-align: top;
+}
+
+pre {
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow: auto;
+  margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-controls {
+    margin-top: 16px;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .header-controls .ant-picker {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+  
+  .header-controls .ant-input-search {
+    width: 100% !important;
+  }
+}
+
+/* 介绍页面样式 */
+.introduction-container {
+  padding: 0;
+}
+
+.introduction-container .ant-typography h2 {
+  margin: 16px 0;
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.introduction-container .ant-typography h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 16px;
+}
+
+.introduction-container .ant-card {
+  height: 100%;
+  transition: all 0.3s;
+}
+
+.introduction-container .ant-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.introduction-container .ant-card-head-title {
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.introduction-container ul {
+  padding-left: 24px;
+}
+
+.introduction-container ul li {
+  margin-bottom: 8px;
+}
+
+/* 调整Tabs组件样式，减少顶部空白 */
+.ant-tabs-nav {
+  margin: 0 !important;
+}
+
+.ant-tabs-tab {
+  padding: 12px 16px !important;
+}
+
+.ant-tabs-content {
+  padding-top: 0;
+}
+
+
+.ant-tabs-nav.css-dev-only-do-not-override-tjsggz {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ant-tabs-content-holder.css-dev-only-do-not-override-tjsggz {
+  padding-top: 0 !important;
+}
+
+/* 直接针对ant-layout组件和header组件的全局样式覆盖 */
+.ant-layout {
+  background: #fff !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ant-layout-header {
+  background: #ffffff !important;
+  padding: 0 !important;
+  height: 0px !important;
+  line-height: 0px !important;
+  margin: 0 !important;
+}
+
+/* 确保content没有边距 */
+.ant-layout-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+} */
+
+/* 移除site-layout-background的边距 */
+.site-layout-background {
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* 确保tabs组件没有边距 */
+.ant-tabs {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ant-tabs-nav {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ant-tabs-content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ant-tabs-tabpane {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 强制移除Dashboard组件的边距 */
+.dashboard-container {
+  margin: 0 !important;
+  padding: 0 !important;
+} 
