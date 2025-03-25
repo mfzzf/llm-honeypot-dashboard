@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Row, Col, DatePicker, Spin, Button, Input, Tag } from 'antd';
 import moment from 'moment';
 import { getLlmLogs } from '../../services/elasticService';
-import { getLlmModelStats, getLlmRequestTypeStats } from '../../services/visualizationService';
+import { getLlmModelStats, getLlmRequestTypeStats, getLlmEventTypeStats, getLlmStatusStats } from '../../services/visualizationService';
 import PieChart from '../../components/charts/PieChart';
 import BarChart from '../../components/charts/BarChart';
 
@@ -56,6 +56,12 @@ const LlmLogs = () => {
   // LLM模型使用统计
   const llmModelData = getLlmModelStats(logs.length ? { hits: { hits: logs } } : null);
 
+  // LLM事件类型统计
+  const llmEventTypeData = getLlmEventTypeStats(logs.length ? { hits: { hits: logs } } : null);
+
+  // LLM状态统计
+  const llmStatusData = getLlmStatusStats(logs.length ? { hits: { hits: logs } } : null);
+
   // 将日志数据转换为表格数据
   const tableData = logs.map((log, index) => {
     const source = log._source;
@@ -69,7 +75,11 @@ const LlmLogs = () => {
       type: source.type,
       question: source.question,
       response: source.response,
-      error: source.error
+      error: source.error,
+      host: source.host,
+      operation: source.operation,
+      reason: source.reason,
+      status: source.status
     };
   });
 
@@ -84,6 +94,11 @@ const LlmLogs = () => {
       title: '消息',
       dataIndex: 'message',
       key: 'message',
+    },
+    {
+      title: '事件类型',
+      dataIndex: 'type',
+      key: 'type',
     },
     {
       title: '级别',
@@ -102,19 +117,33 @@ const LlmLogs = () => {
       }
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: status => {
+        let color = 'blue';
+        if (status === 'rejected') {
+          color = 'red';
+        } else if (status === 'approved') {
+          color = 'green';
+        }
+        return status ? <Tag color={color}>{status}</Tag> : null;
+      }
+    },
+    {
       title: '模型',
       dataIndex: 'model',
       key: 'model',
     },
     {
-      title: '提供商',
-      dataIndex: 'provider',
-      key: 'provider',
+      title: '操作',
+      dataIndex: 'operation',
+      key: 'operation',
     },
     {
-      title: '类型',
-      dataIndex: 'type',
-      key: 'type',
+      title: '主机',
+      dataIndex: 'host',
+      key: 'host',
     }
   ];
 
@@ -131,6 +160,12 @@ const LlmLogs = () => {
           <div>
             <p style={{ fontWeight: 'bold' }}>回复：</p>
             <pre>{record.response}</pre>
+          </div>
+        )}
+        {record.reason && (
+          <div>
+            <p style={{ fontWeight: 'bold', color: 'orange' }}>拒绝原因：</p>
+            <pre>{record.reason}</pre>
           </div>
         )}
         {record.error && (
@@ -193,6 +228,31 @@ const LlmLogs = () => {
                   data={llmModelData.models.map((model, index) => ({
                     name: model,
                     value: llmModelData.counts[index]
+                  }))}
+                />
+              </Card>
+            </Col>
+          </Row>
+          
+          <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+            <Col span={12}>
+              <Card title="LLM事件类型分布">
+                <PieChart
+                  title="事件类型统计"
+                  data={llmEventTypeData.eventTypes.map((eventType, index) => ({
+                    name: eventType,
+                    value: llmEventTypeData.counts[index]
+                  }))}
+                />
+              </Card>
+            </Col>
+            <Col span={12}>
+              <Card title="LLM状态分布">
+                <PieChart
+                  title="状态统计"
+                  data={llmStatusData.statuses.map((status, index) => ({
+                    name: status,
+                    value: llmStatusData.counts[index]
                   }))}
                 />
               </Card>

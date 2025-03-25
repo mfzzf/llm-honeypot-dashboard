@@ -97,4 +97,40 @@ export const getHoneypotIpStats = (data) => {
   const counts = sortedEntries.map(entry => entry[1]);
 
   return { ips, counts };
+};
+
+// 获取LLM事件类型统计
+export const getLlmEventTypeStats = (data) => {
+  if (!data || !data.hits || !data.hits.hits) {
+    return { eventTypes: [], counts: [] };
+  }
+
+  const eventTypeCountMap = {};
+  data.hits.hits.forEach(hit => {
+    const eventType = hit._source.type || 'unknown';
+    eventTypeCountMap[eventType] = (eventTypeCountMap[eventType] || 0) + 1;
+  });
+
+  const eventTypes = Object.keys(eventTypeCountMap);
+  const counts = eventTypes.map(eventType => eventTypeCountMap[eventType]);
+
+  return { eventTypes, counts };
+};
+
+// 获取LLM状态统计
+export const getLlmStatusStats = (data) => {
+  if (!data || !data.hits || !data.hits.hits) {
+    return { statuses: [], counts: [] };
+  }
+
+  const statusCountMap = {};
+  data.hits.hits.forEach(hit => {
+    const status = hit._source.status || 'unknown';
+    statusCountMap[status] = (statusCountMap[status] || 0) + 1;
+  });
+
+  const statuses = Object.keys(statusCountMap);
+  const counts = statuses.map(status => statusCountMap[status]);
+
+  return { statuses, counts };
 }; 
