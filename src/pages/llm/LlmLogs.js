@@ -149,29 +149,29 @@ const LlmLogs = () => {
 
   const expandedRowRender = (record) => {
     return (
-      <div>
+      <div style={{ maxWidth: '100%', overflow: 'auto' }}>
         {record.question && (
           <div>
             <p style={{ fontWeight: 'bold' }}>问题：</p>
-            <pre>{record.question}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%' }}>{record.question}</pre>
           </div>
         )}
         {record.response && (
           <div>
             <p style={{ fontWeight: 'bold' }}>回复：</p>
-            <pre>{record.response}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%' }}>{record.response}</pre>
           </div>
         )}
-        {record.reason && (
+        {record.reason && record.status !== 'allowed' && record.status !== 'approved' && (
           <div>
             <p style={{ fontWeight: 'bold', color: 'orange' }}>拒绝原因：</p>
-            <pre>{record.reason}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%' }}>{record.reason}</pre>
           </div>
         )}
         {record.error && (
           <div>
             <p style={{ fontWeight: 'bold', color: 'red' }}>错误：</p>
-            <pre>{record.error}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '100%' }}>{record.error}</pre>
           </div>
         )}
       </div>

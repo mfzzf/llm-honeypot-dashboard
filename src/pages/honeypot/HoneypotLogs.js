@@ -126,7 +126,7 @@ const HoneypotLogs = () => {
     );
     
     return (
-      <div>
+      <div style={{ maxWidth: '100%', overflow: 'auto' }}>
         {details.length > 0 && (
           <div>
             <p style={{ fontWeight: 'bold' }}>详细信息：</p>
@@ -135,7 +135,7 @@ const HoneypotLogs = () => {
                 {details.map(([key, value]) => (
                   <tr key={key}>
                     <td style={{ fontWeight: 'bold', paddingRight: '16px' }}>{key}:</td>
-                    <td>{String(value)}</td>
+                    <td style={{ wordBreak: 'break-word', maxWidth: '500px' }}>{String(value)}</td>
                   </tr>
                 ))}
               </tbody>
