@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 
-const BarChart = ({ title, data, xAxisData, yAxisName }) => {
+const BarChart = ({ title, data, xAxisData, yAxisName, onClickItem }) => {
   const option = {
     title: {
       text: title,
@@ -36,7 +36,19 @@ const BarChart = ({ title, data, xAxisData, yAxisName }) => {
     ]
   };
 
-  return <ReactECharts option={option} style={{ height: '300px' }} />;
+  const onEvents = {
+    'click': (params) => {
+      if (onClickItem && typeof onClickItem === 'function') {
+        onClickItem(xAxisData[params.dataIndex]);
+      }
+    }
+  };
+
+  return <ReactECharts 
+    option={option} 
+    style={{ height: '300px' }} 
+    onEvents={onEvents}
+  />;
 };
 
 export default BarChart; 

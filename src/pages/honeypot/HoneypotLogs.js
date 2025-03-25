@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Row, Col, DatePicker, Spin, Input, Tag } from 'antd';
+import { Card, Table, Row, Col, DatePicker, Spin, Input, Tag, Button } from 'antd';
 import moment from 'moment';
 import { getHoneypotLogs } from '../../services/elasticService';
 import { getLogLevelStats, getHoneypotIpStats } from '../../services/visualizationService';
@@ -17,6 +17,8 @@ const HoneypotLogs = () => {
     moment()
   ]);
   const [searchQuery, setSearchQuery] = useState('*');
+  const [levelFilter, setLevelFilter] = useState(null);
+  const [ipFilter, setIpFilter] = useState(null);
 
   // 加载数据
   useEffect(() => {
@@ -48,6 +50,20 @@ const HoneypotLogs = () => {
 
   const handleSearch = (value) => {
     setSearchQuery(value || '*');
+    // 清除所有筛选
+    setLevelFilter(null);
+    setIpFilter(null);
+  };
+
+  // 处理图表点击事件
+  const handleLevelClick = (level) => {
+    setLevelFilter(levelFilter === level ? null : level);
+    setIpFilter(null);
+  };
+
+  const handleIpClick = (ip) => {
+    setIpFilter(ipFilter === ip ? null : ip);
+    setLevelFilter(null);
   };
 
   // 处理日志级别统计
@@ -57,22 +73,29 @@ const HoneypotLogs = () => {
   const ipStatsData = getHoneypotIpStats(logs.length ? { hits: { hits: logs } } : null);
 
   // 将日志数据转换为表格数据
-  const tableData = logs.map((log, index) => {
-    const source = log._source;
-    return {
-      key: index,
-      timestamp: source['@timestamp'],
-      message: source.message,
-      level: source.level,
-      host: source.host,
-      remoteAddr: source.remote_addr || source.client_ip,
-      sessionId: source.session_id,
-      testId: source.test_id,
-      type: source.type,
-      username: source.username,
-      path: source.path
-    };
-  });
+  const tableData = logs
+    .map((log, index) => {
+      const source = log._source;
+      return {
+        key: index,
+        timestamp: source['@timestamp'],
+        message: source.message,
+        level: source.level,
+        host: source.host,
+        remoteAddr: source.remote_addr || source.client_ip,
+        sessionId: source.session_id,
+        testId: source.test_id,
+        type: source.type,
+        username: source.username,
+        path: source.path
+      };
+    })
+    .filter(item => {
+      // 应用筛选
+      if (levelFilter && item.level !== levelFilter) return false;
+      if (ipFilter && item.remoteAddr !== ipFilter) return false;
+      return true;
+    });
 
   const columns = [
     {
@@ -169,6 +192,19 @@ const HoneypotLogs = () => {
             style={{ width: 250 }}
             allowClear
           />
+          {(levelFilter || ipFilter) && (
+            <Button 
+              type="primary" 
+              danger 
+              style={{ marginLeft: '16px' }}
+              onClick={() => {
+                setLevelFilter(null);
+                setIpFilter(null);
+              }}
+            >
+              清除筛选
+            </Button>
+          )}
         </div>
       </div>
 
@@ -180,26 +216,28 @@ const HoneypotLogs = () => {
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
             <Col span={12}>
-              <Card title="日志级别分布">
+              <Card title={`日志级别分布 ${levelFilter ? `(已筛选: ${levelFilter})` : ''}`}>
                 <PieChart
                   title="日志级别统计"
                   data={logLevelData}
+                  onClickItem={handleLevelClick}
                 />
               </Card>
             </Col>
             <Col span={12}>
-              <Card title="IP地址访问统计">
+              <Card title={`IP地址访问统计 ${ipFilter ? `(已筛选: ${ipFilter})` : ''}`}>
                 <BarChart
                   title="TOP访问IP"
                   data={ipStatsData.counts}
                   xAxisData={ipStatsData.ips}
                   yAxisName="访问次数"
+                  onClickItem={handleIpClick}
                 />
               </Card>
             </Col>
           </Row>
 
-          <Card title={`日志列表 (${logs.length}条)`}>
+          <Card title={`日志列表 (${tableData.length}条${(levelFilter || ipFilter) ? ', 已筛选' : ''})`}>
             <Table
               columns={columns}
               dataSource={tableData}

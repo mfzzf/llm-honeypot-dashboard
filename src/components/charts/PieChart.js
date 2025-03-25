@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 
-const PieChart = ({ title, data }) => {
+const PieChart = ({ title, data, onClickItem }) => {
   const option = {
     title: {
       text: title,
@@ -45,7 +45,19 @@ const PieChart = ({ title, data }) => {
     ]
   };
 
-  return <ReactECharts option={option} style={{ height: '300px' }} />;
+  const onEvents = {
+    'click': (params) => {
+      if (onClickItem && typeof onClickItem === 'function') {
+        onClickItem(params.name);
+      }
+    }
+  };
+
+  return <ReactECharts 
+    option={option} 
+    style={{ height: '300px' }} 
+    onEvents={onEvents}
+  />;
 };
 
 export default PieChart; 

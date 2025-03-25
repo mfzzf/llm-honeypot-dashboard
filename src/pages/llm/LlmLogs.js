@@ -17,6 +17,10 @@ const LlmLogs = () => {
     moment()
   ]);
   const [searchQuery, setSearchQuery] = useState('*');
+  const [typeFilter, setTypeFilter] = useState(null);
+  const [modelFilter, setModelFilter] = useState(null);
+  const [eventTypeFilter, setEventTypeFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
 
   // 加载数据
   useEffect(() => {
@@ -48,6 +52,44 @@ const LlmLogs = () => {
 
   const handleSearch = (value) => {
     setSearchQuery(value || '*');
+    // 清除所有筛选
+    setTypeFilter(null);
+    setModelFilter(null);
+    setEventTypeFilter(null);
+    setStatusFilter(null);
+  };
+
+  // 处理图表点击事件
+  const handleTypeClick = (type) => {
+    setTypeFilter(typeFilter === type ? null : type);
+    // 清除其他筛选
+    setModelFilter(null);
+    setEventTypeFilter(null);
+    setStatusFilter(null);
+  };
+
+  const handleModelClick = (model) => {
+    setModelFilter(modelFilter === model ? null : model);
+    // 清除其他筛选
+    setTypeFilter(null);
+    setEventTypeFilter(null);
+    setStatusFilter(null);
+  };
+
+  const handleEventTypeClick = (eventType) => {
+    setEventTypeFilter(eventTypeFilter === eventType ? null : eventType);
+    // 清除其他筛选
+    setTypeFilter(null);
+    setModelFilter(null);
+    setStatusFilter(null);
+  };
+
+  const handleStatusClick = (status) => {
+    setStatusFilter(statusFilter === status ? null : status);
+    // 清除其他筛选
+    setTypeFilter(null);
+    setModelFilter(null);
+    setEventTypeFilter(null);
   };
 
   // 处理LLM请求类型统计
@@ -63,25 +105,34 @@ const LlmLogs = () => {
   const llmStatusData = getLlmStatusStats(logs.length ? { hits: { hits: logs } } : null);
 
   // 将日志数据转换为表格数据
-  const tableData = logs.map((log, index) => {
-    const source = log._source;
-    return {
-      key: index,
-      timestamp: source['@timestamp'],
-      message: source.message,
-      level: source.level,
-      model: source.model,
-      provider: source.provider,
-      type: source.type,
-      question: source.question,
-      response: source.response,
-      error: source.error,
-      host: source.host,
-      operation: source.operation,
-      reason: source.reason,
-      status: source.status
-    };
-  });
+  const tableData = logs
+    .map((log, index) => {
+      const source = log._source;
+      return {
+        key: index,
+        timestamp: source['@timestamp'],
+        message: source.message,
+        level: source.level,
+        model: source.model,
+        provider: source.provider,
+        type: source.type,
+        question: source.question,
+        response: source.response,
+        error: source.error,
+        host: source.host,
+        operation: source.operation,
+        reason: source.reason,
+        status: source.status
+      };
+    })
+    .filter(item => {
+      // 应用筛选
+      if (typeFilter && item.type !== typeFilter) return false;
+      if (modelFilter && item.model !== modelFilter) return false;
+      if (eventTypeFilter && item.type !== eventTypeFilter) return false;
+      if (statusFilter && item.status !== statusFilter) return false;
+      return true;
+    });
 
   const columns = [
     {
@@ -201,6 +252,21 @@ const LlmLogs = () => {
             style={{ width: 250 }}
             allowClear
           />
+          {(typeFilter || modelFilter || eventTypeFilter || statusFilter) && (
+            <Button 
+              type="primary" 
+              danger 
+              style={{ marginLeft: '16px' }}
+              onClick={() => {
+                setTypeFilter(null);
+                setModelFilter(null);
+                setEventTypeFilter(null);
+                setStatusFilter(null);
+              }}
+            >
+              清除筛选
+            </Button>
+          )}
         </div>
       </div>
 
@@ -212,23 +278,25 @@ const LlmLogs = () => {
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
             <Col span={12}>
-              <Card title="LLM请求类型分布">
+              <Card title={`LLM请求类型分布 ${typeFilter ? `(已筛选: ${typeFilter})` : ''}`}>
                 <BarChart
                   title="LLM请求类型"
                   data={llmTypeData.counts}
                   xAxisData={llmTypeData.types}
                   yAxisName="请求数量"
+                  onClickItem={handleTypeClick}
                 />
               </Card>
             </Col>
             <Col span={12}>
-              <Card title="LLM模型使用分布">
+              <Card title={`LLM模型使用分布 ${modelFilter ? `(已筛选: ${modelFilter})` : ''}`}>
                 <PieChart
                   title="模型使用统计"
                   data={llmModelData.models.map((model, index) => ({
                     name: model,
                     value: llmModelData.counts[index]
                   }))}
+                  onClickItem={handleModelClick}
                 />
               </Card>
             </Col>
@@ -236,30 +304,32 @@ const LlmLogs = () => {
           
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
             <Col span={12}>
-              <Card title="LLM事件类型分布">
+              <Card title={`LLM事件类型分布 ${eventTypeFilter ? `(已筛选: ${eventTypeFilter})` : ''}`}>
                 <PieChart
                   title="事件类型统计"
                   data={llmEventTypeData.eventTypes.map((eventType, index) => ({
                     name: eventType,
                     value: llmEventTypeData.counts[index]
                   }))}
+                  onClickItem={handleEventTypeClick}
                 />
               </Card>
             </Col>
             <Col span={12}>
-              <Card title="LLM状态分布">
+              <Card title={`LLM状态分布 ${statusFilter ? `(已筛选: ${statusFilter})` : ''}`}>
                 <PieChart
                   title="状态统计"
                   data={llmStatusData.statuses.map((status, index) => ({
                     name: status,
                     value: llmStatusData.counts[index]
                   }))}
+                  onClickItem={handleStatusClick}
                 />
               </Card>
             </Col>
           </Row>
-
-          <Card title={`日志列表 (${logs.length}条)`}>
+          
+          <Card title={`日志列表 (${tableData.length}条${(typeFilter || modelFilter || eventTypeFilter || statusFilter) ? ', 已筛选' : ''})`}>
             <Table
               columns={columns}
               dataSource={tableData}

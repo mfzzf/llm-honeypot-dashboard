@@ -44,7 +44,7 @@ const App = () => {
             </div>
           </Content>
           <Footer style={footerStyle}>
-            LLM与蜜罐日志可视化系统 ©{new Date().getFullYear()} Created with React
+            LLM蜜罐日志可视化系统 ©{new Date().getFullYear()} Created with React
           </Footer>
         </Layout>
       </Layout>
