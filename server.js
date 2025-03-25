@@ -16,6 +16,10 @@ const elasticConfig = {
   auth: {
     username: 'elastic',
     password: 'H3JIfzF2Ic*dbRj4c5Kd'
+  },
+  indices: {
+    honeypot: 'honeypot-logs*',
+    llm: 'llm-logs*'
   }
 };
 
@@ -63,4 +67,6 @@ app.get('/api/elasticsearch/indices', async (req, res) => {
 // 启动服务器
 app.listen(port, () => {
   console.log(`代理服务器运行在 http://localhost:${port}`);
+  console.log(`连接到Elasticsearch: ${elasticConfig.node}`);
+  console.log(`处理索引: ${elasticConfig.indices.honeypot}, ${elasticConfig.indices.llm}`);
 }); 

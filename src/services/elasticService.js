@@ -110,7 +110,7 @@ export const getHoneypotStats = async (from, to) => {
           },
           top_ips: {
             terms: {
-              field: 'client_ip.keyword',
+              field: 'remote_addr.keyword',
               size: 10
             }
           },
@@ -120,9 +120,33 @@ export const getHoneypotStats = async (from, to) => {
               size: 10
             }
           },
-          by_method: {
+          by_event_type: {
             terms: {
-              field: 'method.keyword',
+              field: 'event_type.keyword',
+              size: 10
+            }
+          },
+          by_level: {
+            terms: {
+              field: 'level.keyword',
+              size: 5
+            }
+          },
+          by_protocol: {
+            terms: {
+              field: 'protocol.keyword',
+              size: 5
+            }
+          },
+          by_username: {
+            terms: {
+              field: 'username.keyword',
+              size: 10
+            }
+          },
+          by_type: {
+            terms: {
+              field: 'type.keyword',
               size: 10
             }
           }

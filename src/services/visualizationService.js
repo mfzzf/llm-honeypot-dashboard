@@ -85,7 +85,8 @@ export const getHoneypotIpStats = (data) => {
 
   const ipCountMap = {};
   data.hits.hits.forEach(hit => {
-    const ip = hit._source.remote_addr || hit._source.client_ip || 'unknown';
+    // 支持多种可能的IP字段命名
+    const ip = hit._source.remote_addr || hit._source.client_ip || hit._source.host || 'unknown';
     if (ip !== 'unknown') {
       ipCountMap[ip] = (ipCountMap[ip] || 0) + 1;
     }
@@ -133,4 +134,24 @@ export const getLlmStatusStats = (data) => {
   const counts = statuses.map(status => statusCountMap[status]);
 
   return { statuses, counts };
+};
+
+// 从蜜罐日志中提取事件类型统计
+export const getHoneypotEventTypeStats = (data) => {
+  if (!data || !data.hits || !data.hits.hits) {
+    return { eventTypes: [], counts: [] };
+  }
+
+  const eventTypeCountMap = {};
+  data.hits.hits.forEach(hit => {
+    const eventType = hit._source.event_type || hit._source.type || 'unknown';
+    eventTypeCountMap[eventType] = (eventTypeCountMap[eventType] || 0) + 1;
+  });
+
+  // 按出现次数排序
+  const sortedEntries = Object.entries(eventTypeCountMap).sort((a, b) => b[1] - a[1]);
+  const eventTypes = sortedEntries.map(entry => entry[0]);
+  const counts = sortedEntries.map(entry => entry[1]);
+
+  return { eventTypes, counts };
 }; 

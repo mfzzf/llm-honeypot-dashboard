@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Row, Col, DatePicker, Spin, Input, Tag, Button } from 'antd';
 import moment from 'moment';
 import { getHoneypotLogs } from '../../services/elasticService';
-import { getLogLevelStats, getHoneypotIpStats } from '../../services/visualizationService';
+import { getLogLevelStats, getHoneypotIpStats, getHoneypotEventTypeStats } from '../../services/visualizationService';
 import PieChart from '../../components/charts/PieChart';
 import BarChart from '../../components/charts/BarChart';
 
@@ -19,6 +19,7 @@ const HoneypotLogs = () => {
   const [searchQuery, setSearchQuery] = useState('*');
   const [levelFilter, setLevelFilter] = useState(null);
   const [ipFilter, setIpFilter] = useState(null);
+  const [eventTypeFilter, setEventTypeFilter] = useState(null);
 
   // 加载数据
   useEffect(() => {
@@ -53,17 +54,26 @@ const HoneypotLogs = () => {
     // 清除所有筛选
     setLevelFilter(null);
     setIpFilter(null);
+    setEventTypeFilter(null);
   };
 
   // 处理图表点击事件
   const handleLevelClick = (level) => {
     setLevelFilter(levelFilter === level ? null : level);
     setIpFilter(null);
+    setEventTypeFilter(null);
   };
 
   const handleIpClick = (ip) => {
     setIpFilter(ipFilter === ip ? null : ip);
     setLevelFilter(null);
+    setEventTypeFilter(null);
+  };
+
+  const handleEventTypeClick = (eventType) => {
+    setEventTypeFilter(eventTypeFilter === eventType ? null : eventType);
+    setLevelFilter(null);
+    setIpFilter(null);
   };
 
   // 处理日志级别统计
@@ -71,6 +81,9 @@ const HoneypotLogs = () => {
 
   // 蜜罐IP访问统计
   const ipStatsData = getHoneypotIpStats(logs.length ? { hits: { hits: logs } } : null);
+  
+  // 蜜罐事件类型统计
+  const eventTypeData = getHoneypotEventTypeStats(logs.length ? { hits: { hits: logs } } : null);
 
   // 将日志数据转换为表格数据
   const tableData = logs
@@ -87,13 +100,23 @@ const HoneypotLogs = () => {
         testId: source.test_id,
         type: source.type,
         username: source.username,
-        path: source.path
+        path: source.path,
+        eventType: source.event_type,
+        port: source.port,
+        protocol: source.protocol,
+        model: source.model,
+        provider: source.provider,
+        command: source.command,
+        operation: source.operation,
+        question: source.question,
+        reason: source.reason
       };
     })
     .filter(item => {
       // 应用筛选
       if (levelFilter && item.level !== levelFilter) return false;
       if (ipFilter && item.remoteAddr !== ipFilter) return false;
+      if (eventTypeFilter && item.eventType !== eventTypeFilter) return false;
       return true;
     });
 
@@ -136,6 +159,11 @@ const HoneypotLogs = () => {
       key: 'type',
     },
     {
+      title: '事件类型',
+      dataIndex: 'eventType',
+      key: 'eventType',
+    },
+    {
       title: '主机',
       dataIndex: 'host',
       key: 'host',
@@ -145,7 +173,7 @@ const HoneypotLogs = () => {
   const expandedRowRender = (record) => {
     const details = Object.entries(record).filter(([key, value]) => 
       value && 
-      !['key', 'timestamp', 'message', 'level', 'remoteAddr', 'type', 'host'].includes(key)
+      !['key', 'timestamp', 'message', 'level', 'remoteAddr', 'type', 'eventType', 'host'].includes(key)
     );
     
     return (
@@ -192,7 +220,7 @@ const HoneypotLogs = () => {
             style={{ width: 250 }}
             allowClear
           />
-          {(levelFilter || ipFilter) && (
+          {(levelFilter || ipFilter || eventTypeFilter) && (
             <Button 
               type="primary" 
               danger 
@@ -200,6 +228,7 @@ const HoneypotLogs = () => {
               onClick={() => {
                 setLevelFilter(null);
                 setIpFilter(null);
+                setEventTypeFilter(null);
               }}
             >
               清除筛选
@@ -215,7 +244,7 @@ const HoneypotLogs = () => {
       ) : (
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-            <Col span={12}>
+            <Col span={8}>
               <Card title={`日志级别分布 ${levelFilter ? `(已筛选: ${levelFilter})` : ''}`}>
                 <PieChart
                   title="日志级别统计"
@@ -224,7 +253,7 @@ const HoneypotLogs = () => {
                 />
               </Card>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Card title={`IP地址访问统计 ${ipFilter ? `(已筛选: ${ipFilter})` : ''}`}>
                 <BarChart
                   title="TOP访问IP"
@@ -235,9 +264,20 @@ const HoneypotLogs = () => {
                 />
               </Card>
             </Col>
+            <Col span={8}>
+              <Card title={`事件类型统计 ${eventTypeFilter ? `(已筛选: ${eventTypeFilter})` : ''}`}>
+                <BarChart
+                  title="事件类型分布"
+                  data={eventTypeData.counts}
+                  xAxisData={eventTypeData.eventTypes}
+                  yAxisName="事件数"
+                  onClickItem={handleEventTypeClick}
+                />
+              </Card>
+            </Col>
           </Row>
 
-          <Card title={`日志列表 (${tableData.length}条${(levelFilter || ipFilter) ? ', 已筛选' : ''})`}>
+          <Card title={`日志列表 (${tableData.length}条${(levelFilter || ipFilter || eventTypeFilter) ? ', 已筛选' : ''})`}>
             <Table
               columns={columns}
               dataSource={tableData}
