@@ -10,6 +10,7 @@ const getPageTitle = (pathname) => {
   if (pathname.includes('/dashboard')) return '仪表盘概览';
   if (pathname.includes('/honeypot-logs')) return '蜜罐日志分析';
   if (pathname.includes('/llm-logs')) return 'LLM请求日志';
+  if (pathname.includes('/gpu-metrics')) return 'GPU监控';
   return '日志可视化系统';
 };
 

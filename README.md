@@ -1,126 +1,208 @@
-# LLM与蜜罐日志可视化系统
+# LLM蜜罐日志可视化系统技术文档
 
-一个用于监控和分析大型语言模型(LLM)请求和蜜罐活动的可视化平台。系统从Elasticsearch收集日志数据，并提供直观的图表和分析功能。
+## 1. 项目概述
 
-## 项目概述
+LLM蜜罐日志可视化系统是一个用于监控和分析蜜罐系统与LLM（大型语言模型）服务日志的Web应用程序。系统通过可视化方式展示蜜罐攻击数据和LLM使用情况，同时提供GPU资源监控功能。
 
-本系统旨在帮助安全分析师和开发人员监控和分析：
-- LLM服务的使用情况和性能指标
-- 蜜罐系统检测到的可疑活动和攻击尝试
+## 2. 系统架构
 
-系统通过直观的图表和详细的日志查询功能，帮助用户快速识别异常行为和潜在的安全威胁。
+### 2.1 前端架构
 
-## 主要功能
+- **框架**：React 19.0.0
+- **UI库**：Ant Design 5.24.4
+- **路由**：React Router Dom 7.4.0
+- **图表库**：
+  - ECharts 5.6.0
+  - ECharts-for-React 3.0.3
+  - @ant-design/charts 2.2.7
+- **HTTP客户端**：Axios 1.8.4
+- **日期处理**：Moment 2.30.1
 
-### 仪表盘概览
-- 系统整体情况概览
-- LLM请求和蜜罐活动的关键指标统计
-- 时间趋势图表展示
-- 日志级别分布、请求类型分布等统计图表
+### 2.2 后端架构
 
-### 蜜罐日志分析
-- 蜜罐捕获的攻击尝试详细日志
-- 可疑IP地址统计和分析
-- 日志级别分布图表
-- 支持时间范围筛选和关键词搜索
+- **服务器**：Express 4.21.2
+- **中间件**：
+  - CORS 2.8.5
+  - Body Parser 1.20.3
+- **数据源**：
+  - Elasticsearch 8.17.1（存储日志数据）
+  - NVIDIA GPU Metrics Exporter（监控GPU状态）
 
-### LLM请求日志
-- LLM模型使用情况统计
-- 请求类型分布分析
-- 详细的请求与响应内容查看
-- 支持时间范围筛选和关键词搜索
+### 2.3 构建工具
 
-## 技术栈
+- **打包工具**：Webpack 5.98.0
+- **转译器**：Babel 7.26.10
+- **开发服务器**：Webpack Dev Server 5.2.0
 
-- **前端**：React、Ant Design、ECharts
-- **后端**：Node.js、Express
-- **数据存储**：Elasticsearch
-- **构建工具**：Webpack
+## 3. 数据流
 
-## 数据来源
-
-系统数据来自于以下Elasticsearch索引：
-- `llm-logs` - 存储LLM请求和响应的日志
-- `honeypot-logs` - 存储蜜罐活动的日志
-
-## 安装部署
-
-### 环境要求
-- Node.js 16+
-- 已配置的Elasticsearch实例 (7.x或更高版本)
-
-### 安装步骤
-
-1. 克隆仓库
-```bash
-git clone https://github.com/yourusername/llm-honeypot-dashboard.git
-cd llm-honeypot-dashboard
+```
+用户界面 <-> 前端服务层 <-> Express代理服务器 <-> Elasticsearch/GPU Metrics
 ```
 
-2. 安装依赖
-```bash
-npm install
-```
+## 4. 主要功能模块
 
-3. 配置Elasticsearch连接
-在`src/services/elasticService.js`中修改Elasticsearch配置：
+### 4.1 仪表盘模块
+
+- 系统介绍页面
+- 数据统计概览
+- 时间序列图表展示蜜罐访问和LLM请求趋势
+- 日志级别分布图
+- LLM请求类型分布图
+- 蜜罐IP访问统计图
+- LLM模型使用统计图
+
+### 4.2 蜜罐日志模块
+
+- 蜜罐日志查询和展示
+- 过滤和搜索功能
+- 日志详情查看
+
+### 4.3 LLM日志模块
+
+- LLM请求日志查询和展示
+- 按模型、状态等条件过滤
+- 请求详情查看
+
+### 4.4 GPU监控模块
+
+- 实时GPU使用情况监控
+- 多GPU支持
+- 关键指标展示：
+  - GPU温度
+  - 内存使用情况（总量、已用、可用）
+  - 功耗数据（当前功耗、功耗限制）
+  - 利用率（GPU计算利用率、显存利用率）
+
+## 5. 核心服务层
+
+### 5.1 Elasticsearch服务
+
+- `elasticService.js`提供与Elasticsearch交互的功能：
+  - 获取蜜罐和LLM日志
+  - 聚合分析生成统计信息
+  - 支持时间范围查询和过滤
+
+### 5.2 可视化服务
+
+- `visualizationService.js`处理数据转换和可视化准备：
+  - 处理时间序列数据
+  - 生成各类统计图表所需数据格式
+  - 数据预处理和规范化
+
+### 5.3 GPU监控服务
+
+- `gpuService.js`管理GPU监控：
+  - 从NVIDIA GPU Metrics Exporter获取原始指标
+  - 解析Prometheus格式的GPU指标数据
+  - 提取关键性能参数
+
+## 6. 代理服务器
+
+Express代理服务器（server.js）处理：
+- 跨域资源共享问题
+- Elasticsearch API安全访问
+- GPU指标收集
+- 请求路由和转发
+
+## 7. 数据模型
+
+### 7.1 蜜罐日志数据
+
+蜜罐日志存储在Elasticsearch的`honeypot-logs*`索引中，主要字段包括：
+- 时间戳
+- 远程地址
+- 日志级别
+- 事件类型
+- 协议
+- 路径
+- 用户名
+- 类型
+
+### 7.2 LLM日志数据
+
+LLM日志存储在Elasticsearch的`llm-logs*`索引中，主要字段包括：
+- 时间戳
+- 模型名称
+- 请求状态
+- 响应时间
+- 请求内容
+- 响应内容
+
+## 8. 开发和部署
+
+### 8.1 开发环境
+
+- **开发命令**：`npm run dev`（同时启动前端和后端）
+  - 前端：`npm run start`（Webpack开发服务器）
+  - 后端：`npm run server`（Node.js Express服务器）
+
+### 8.2 构建和生产环境
+
+- **构建命令**：`npm run build`（生成生产环境静态文件）
+- **服务启动**：`npm run server`（启动生产环境服务器）
+
+### 8.3 容器化支持
+
+- 项目包含Docker配置文件：
+  - `.dockerignore`：排除不需要的文件
+  - Webpack配置适配容器环境
+
+## 9. 安全配置
+
+- 使用代理服务器避免直接在前端暴露Elasticsearch凭证
+- API请求认证和鉴权
+- 数据传输加密
+
+## 10. 系统配置
+
+### 10.1 Elasticsearch配置
+
 ```javascript
+// Elasticsearch配置
 const elasticConfig = {
-  baseUrl: 'http://localhost:3001/api/elasticsearch',
-  elkUrl: 'your-elasticsearch-host:9200',
-  username: 'your-username',
-  password: 'your-password',
-  honeypotIndex: 'honeypot-logs*',
-  llmIndex: 'llm-logs*'
+  node: 'http://10.255.248.65:9200',
+  auth: {
+    username: 'elastic',
+    password: 'H3JIfzF2Ic*dbRj4c5Kd'
+  },
+  indices: {
+    honeypot: 'honeypot-logs*',
+    llm: 'llm-logs*'
+  }
 };
 ```
 
-4. 启动开发服务器
-```bash
-npm run dev
+### 10.2 GPU监控配置
+
+```javascript
+// GPU 监控配置
+const gpuConfig = {
+  metricsUrl: 'http://10.255.248.65:9835/metrics'
+};
 ```
 
-5. 构建生产版本
-```bash
-npm run build
-```
+## 11. 前端路由结构
 
-## 使用方法
+- `/` - 重定向到仪表板
+- `/dashboard` - 系统仪表板
+- `/honeypot-logs` - 蜜罐日志查询
+- `/llm-logs` - LLM日志查询
+- `/gpu-metrics` - GPU监控
 
-1. 访问系统首页，默认显示系统介绍和总体仪表盘
-2. 使用左侧导航菜单切换不同功能页面
-3. 使用时间选择器选择特定时间范围的数据
-4. 在日志页面使用搜索框进行关键词筛选
-5. 点击日志条目可展开查看详细信息
+## 12. 项目依赖关系
 
-## 开发说明
+前端项目主要依赖于：
+- 核心库：React、React DOM、React Router
+- UI组件：Ant Design
+- 图表库：ECharts、Ant Design Charts
+- 数据处理：Axios、Moment
 
-### 项目结构
-```
-llm-honeypot-dashboard/
-├── public/              # 静态资源
-├── src/                 # 源代码
-│   ├── components/      # 通用组件
-│   │   ├── charts/      # 图表组件
-│   │   └── common/      # 通用UI组件
-│   ├── pages/           # 页面组件
-│   │   ├── dashboard/   # 仪表盘页面
-│   │   ├── honeypot/    # 蜜罐日志页面
-│   │   └── llm/         # LLM日志页面
-│   ├── services/        # 数据服务
-│   ├── App.js           # 应用入口
-│   └── index.js         # 渲染入口
-├── server.js            # 代理服务器
-├── webpack.config.js    # Webpack配置
-└── package.json         # 项目依赖
-```
+后端项目主要依赖于：
+- 服务器：Express
+- Elasticsearch客户端
+- 中间件：CORS、Body Parser
 
-### 开发规范
-- 遵循React函数式组件和Hooks编程风格
-- 使用Ant Design组件库进行UI开发
-- 使用ECharts进行数据可视化
-- 保持代码简洁、注释清晰
+## 13. 总结
 
-## 许可证
-
-MIT 
+LLM蜜罐日志可视化系统是一个现代化的Web应用，结合了前端React框架和后端Express服务，通过Elasticsearch进行数据存储和分析，并提供GPU监控功能。系统采用了组件化设计，清晰的服务层结构，使得数据的收集、处理和可视化变得高效而直观。

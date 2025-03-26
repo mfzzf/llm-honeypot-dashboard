@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Client } = require('@elastic/elasticsearch');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const app = express();
 const port = 3001;
@@ -21,6 +22,11 @@ const elasticConfig = {
     honeypot: 'honeypot-logs*',
     llm: 'llm-logs*'
   }
+};
+
+// GPU 监控配置
+const gpuConfig = {
+  metricsUrl: 'http://10.255.248.65:9835/metrics'
 };
 
 // 创建Elasticsearch客户端
@@ -64,9 +70,29 @@ app.get('/api/elasticsearch/indices', async (req, res) => {
   }
 });
 
+// GPU 指标代理路由
+app.get('/api/gpu/metrics', async (req, res) => {
+  try {
+    console.log('正在获取GPU指标...');
+    const response = await axios.get(gpuConfig.metricsUrl);
+    console.log('GPU指标获取成功');
+    res.setHeader('Content-Type', 'text/plain');
+    res.send(response.data);
+  } catch (error) {
+    console.error('获取GPU指标失败:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 测试路由
+app.get('/api/test', (req, res) => {
+  res.json({ message: '服务器正常运行' });
+});
+
 // 启动服务器
 app.listen(port, () => {
   console.log(`代理服务器运行在 http://localhost:${port}`);
   console.log(`连接到Elasticsearch: ${elasticConfig.node}`);
   console.log(`处理索引: ${elasticConfig.indices.honeypot}, ${elasticConfig.indices.llm}`);
+  console.log(`GPU监控端点: ${gpuConfig.metricsUrl}`);
 }); 

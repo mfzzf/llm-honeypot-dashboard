@@ -6,6 +6,7 @@ import Header from './components/common/Header';
 import Dashboard from './pages/dashboard/Dashboard';
 import HoneypotLogs from './pages/honeypot/HoneypotLogs';
 import LlmLogs from './pages/llm/LlmLogs';
+import GpuMetrics from './pages/GpuMetrics';
 import './App.css';
 
 const { Content, Footer } = Layout;
@@ -40,6 +41,7 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/honeypot-logs" element={<HoneypotLogs />} />
                 <Route path="/llm-logs" element={<LlmLogs />} />
+                <Route path="/gpu-metrics" element={<GpuMetrics />} />
               </Routes>
             </div>
           </Content>

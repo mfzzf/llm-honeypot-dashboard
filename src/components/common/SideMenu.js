@@ -5,6 +5,7 @@ import {
   DashboardOutlined, 
   BugOutlined, 
   RobotOutlined,
+  DesktopOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -18,6 +19,7 @@ const SideMenu = () => {
     if (path.includes('/dashboard')) return '1';
     if (path.includes('/honeypot-logs')) return '2';
     if (path.includes('/llm-logs')) return '3';
+    if (path.includes('/gpu-metrics')) return '4';
     return '1';
   };
 
@@ -46,6 +48,9 @@ const SideMenu = () => {
         </Menu.Item>
         <Menu.Item key="3" icon={<RobotOutlined />}>
           <Link to="/llm-logs">LLM日志</Link>
+        </Menu.Item>
+        <Menu.Item key="4" icon={<DesktopOutlined />}>
+          <Link to="/gpu-metrics">GPU监控</Link>
         </Menu.Item>
       </Menu>
     </Sider>
