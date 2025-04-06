@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout, ConfigProvider, theme, FloatButton } from 'antd';
+import { Layout, ConfigProvider, FloatButton } from 'antd';
 import { 
   RocketOutlined, 
-  BulbOutlined,
-  BulbFilled,
   QuestionCircleOutlined
 } from '@ant-design/icons';
 import SideMenu from './components/common/SideMenu';
@@ -16,7 +14,6 @@ import GpuMetrics from './pages/GpuMetrics';
 import './App.css';
 
 const { Content, Footer } = Layout;
-const { defaultAlgorithm, darkAlgorithm } = theme;
 
 // 定义自定义主题
 const customTheme = {
@@ -67,40 +64,15 @@ const footerStyle = {
 };
 
 const App = () => {
-  // 深色模式状态
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  // 从本地存储中加载主题偏好
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === 'dark');
-    } else {
-      // 检测系统主题
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(prefersDark);
-    }
-  }, []);
-  
-  // 切换深色/浅色模式
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-  };
-
   return (
     <ConfigProvider
-      theme={{
-        ...customTheme,
-        algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
-      }}
+      theme={customTheme}
     >
       <Router>
-        <Layout style={layoutStyle} className={isDarkMode ? 'dark-theme' : 'light-theme'}>
-          <SideMenu isDarkMode={isDarkMode} />
+        <Layout style={layoutStyle}>
+          <SideMenu />
           <Layout className="site-layout" style={{ margin: 0, padding: 0 }}>
-            <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+            <Header />
             <Content style={contentStyle}>
               <div className="site-layout-background" style={{ margin: 0, padding: 0 }}>
                 <Routes>
@@ -113,15 +85,8 @@ const App = () => {
               </div>
             </Content>
             <Footer style={footerStyle}>
-              <div style={{ margin: '0 auto', maxWidth: '1200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  LLM蜜罐日志可视化系统 ©{new Date().getFullYear()} 
-                </div>
-                <div>
-                  <a href="#" style={{ marginRight: '16px' }}>帮助文档</a>
-                  <a href="#" style={{ marginRight: '16px' }}>API</a>
-                  <a href="#">关于</a>
-                </div>
+              <div style={{ margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                HiveGuard智能化蜜罐可视化系统 ©{new Date().getFullYear()} 
               </div>
             </Footer>
           </Layout>
@@ -130,7 +95,6 @@ const App = () => {
             style={{ right: 24 }}
             icon={<RocketOutlined />}
           >
-            <FloatButton icon={isDarkMode ? <BulbFilled /> : <BulbOutlined />} tooltip="切换主题" onClick={toggleTheme} />
             <FloatButton icon={<QuestionCircleOutlined />} tooltip="帮助" />
           </FloatButton.Group>
         </Layout>

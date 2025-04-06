@@ -352,13 +352,13 @@ const Dashboard = () => {
         type="card"
       >
         <TabPane 
-          tab={<span><InfoCircleOutlined />系统介绍</span>} 
+          tab={<span><InfoCircleOutlined />  系统介绍</span>} 
           key="1"
         >
           <Introduction />
         </TabPane>
         <TabPane 
-          tab={<span><DashboardOutlined />数据仪表盘</span>} 
+          tab={<span><DashboardOutlined />  数据仪表盘</span>} 
           key="2"
         >
           {renderCharts()}

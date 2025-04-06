@@ -7,9 +7,7 @@ import {
   UserOutlined, 
   LogoutOutlined,
   DownOutlined,
-  InfoCircleOutlined,
-  BulbOutlined,
-  BulbFilled
+  InfoCircleOutlined
 } from '@ant-design/icons';
 import { useLocation } from 'react-router-dom';
 
@@ -24,20 +22,20 @@ const getPageTitle = (pathname) => {
   return '日志可视化系统';
 };
 
-const getHeaderStyle = (isDarkMode) => ({
+const headerStyle = {
   padding: 0,
-  height: '60px',
-  lineHeight: '60px',
+  height: '80px',
+  lineHeight: '80px',
   boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
-  background: isDarkMode ? '#1f1f1f' : '#fff',
+  background: '#fff',
   margin: 0,
-  borderBottom: `1px solid ${isDarkMode ? '#303030' : '#f0f0f0'}`,
+  borderBottom: '1px solid #f0f0f0',
   zIndex: 1000,
   position: 'sticky',
   top: 0,
-});
+};
 
-const Header = ({ isDarkMode, toggleTheme }) => {
+const Header = () => {
   const location = useLocation();
   const pageTitle = getPageTitle(location.pathname);
 
@@ -104,7 +102,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
   );
 
   return (
-    <AntHeader className="site-layout-background" style={getHeaderStyle(isDarkMode)}>
+    <AntHeader className="site-layout-background" style={headerStyle}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -119,33 +117,23 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           <Title level={4} style={{ 
             margin: 0, 
             marginRight: 12, 
-            fontSize: '18px',
-            color: isDarkMode ? '#fff' : 'inherit'
+            fontSize: '18px'
           }}>
             {pageTitle}
           </Title>
           <Tooltip title="查看此页面说明">
-            <InfoCircleOutlined style={{ color: isDarkMode ? '#8c8c8c' : '#8c8c8c', cursor: 'pointer' }} />
+            <InfoCircleOutlined style={{ color: '#8c8c8c', cursor: 'pointer' }} />
           </Tooltip>
         </div>
         <Space size="middle">
           <Button 
-            type={isDarkMode ? "default" : "text"}
+            type="text"
             icon={<ReloadOutlined />} 
             onClick={() => window.location.reload()}
             size="middle"
           >
             刷新
           </Button>
-          
-          <Tooltip title={isDarkMode ? "切换到亮色模式" : "切换到暗色模式"}>
-            <Button
-              type={isDarkMode ? "default" : "text"}
-              icon={isDarkMode ? <BulbFilled /> : <BulbOutlined />}
-              onClick={toggleTheme}
-              size="middle"
-            />
-          </Tooltip>
 
           <Dropdown 
             overlay={notificationMenu} 
@@ -154,7 +142,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           >
             <Badge count={2} size="small">
               <Button
-                type={isDarkMode ? "default" : "text"}
+                type="text"
                 icon={<BellOutlined />}
                 size="middle"
               />
@@ -168,8 +156,8 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           >
             <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               <Avatar style={{ marginRight: 8, backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
-              <span style={{ color: isDarkMode ? '#fff' : 'inherit' }}>管理员</span>
-              <DownOutlined style={{ fontSize: '12px', marginLeft: 4, color: isDarkMode ? '#8c8c8c' : '#8c8c8c' }} />
+              <span>管理员</span>
+              <DownOutlined style={{ fontSize: '12px', marginLeft: 4, color: '#8c8c8c' }} />
             </div>
           </Dropdown>
         </Space>

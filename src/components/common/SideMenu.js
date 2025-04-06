@@ -51,7 +51,7 @@ const pulseAnimation = `
   }
 `;
 
-const SideMenu = ({ isDarkMode }) => {
+const SideMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   
@@ -86,7 +86,7 @@ const SideMenu = ({ isDarkMode }) => {
           <AreaChartOutlined style={logoIconStyle} />
           {!collapsed && (
             <Title level={4} style={{ margin: 0, color: '#fff', fontSize: '16px' }}>
-              LLM/蜜罐监控
+              HiveGuard监控
             </Title>
           )}
         </div>
@@ -133,65 +133,65 @@ const SideMenu = ({ isDarkMode }) => {
                   icon: <DesktopOutlined />,
                   label: <Link to="/gpu-metrics">GPU监控</Link>,
                 },
-                {
-                  key: '5',
-                  icon: <LineChartOutlined />,
-                  label: <Link to="/performance">性能监控</Link>,
-                },
+                // {
+                //   key: '5',
+                //   icon: <LineChartOutlined />,
+                //   label: <Link to="/performance">性能监控</Link>,
+                // },
               ]
             },
-            {
-              type: 'divider',
-              style: { borderColor: 'rgba(255, 255, 255, 0.06)', margin: '8px 0' }
-            },
-            {
-              key: 'report-group',
-              label: '统计报表',
-              type: 'group',
-              children: [
-                {
-                  key: '6',
-                  icon: <BarChartOutlined />,
-                  label: <Link to="/charts/bar">柱状图表</Link>,
-                },
-                {
-                  key: '7',
-                  icon: <PieChartOutlined />,
-                  label: <Link to="/charts/pie">饼状图表</Link>,
-                },
-                {
-                  key: '8',
-                  icon: <FileSearchOutlined />,
-                  label: <Link to="/reports">报表中心</Link>,
-                },
-              ]
-            },
-            {
-              type: 'divider',
-              style: { borderColor: 'rgba(255, 255, 255, 0.06)', margin: '8px 0' }
-            },
-            {
-              key: 'setting-group',
-              label: '系统设置',
-              type: 'group',
-              children: [
-                {
-                  key: '9',
-                  icon: <SettingOutlined />,
-                  label: <Link to="/settings">系统设置</Link>,
-                },
-                {
-                  key: '10',
-                  icon: <TeamOutlined />,
-                  label: <Link to="/users">用户管理</Link>,
-                },
-                {
-                  key: '11',
-                  icon: <ToolOutlined />,
-                  label: <Link to="/tools">工具集</Link>,
-                }
-              ]
-            }
+            // {
+            //   type: 'divider',
+            //   style: { borderColor: 'rgba(255, 255, 255, 0.06)', margin: '8px 0' }
+            // },
+            // {
+            //   key: 'report-group',
+            //   label: '统计报表',
+            //   type: 'group',
+            //   children: [
+            //     {
+            //       key: '6',
+            //       icon: <BarChartOutlined />,
+            //       label: <Link to="/charts/bar">柱状图表</Link>,
+            //     },
+            //     {
+            //       key: '7',
+            //       icon: <PieChartOutlined />,
+            //       label: <Link to="/charts/pie">饼状图表</Link>,
+            //     },
+            //     {
+            //       key: '8',
+            //       icon: <FileSearchOutlined />,
+            //       label: <Link to="/reports">报表中心</Link>,
+            //     },
+            //   ]
+            // },
+            // {
+            //   type: 'divider',
+            //   style: { borderColor: 'rgba(255, 255, 255, 0.06)', margin: '8px 0' }
+            // },
+            // {
+            //   key: 'setting-group',
+            //   label: '系统设置',
+            //   type: 'group',
+            //   children: [
+            //     {
+            //       key: '9',
+            //       icon: <SettingOutlined />,
+            //       label: <Link to="/settings">系统设置</Link>,
+            //     },
+            //     {
+            //       key: '10',
+            //       icon: <TeamOutlined />,
+            //       label: <Link to="/users">用户管理</Link>,
+            //     },
+            //     {
+            //       key: '11',
+            //       icon: <ToolOutlined />,
+            //       label: <Link to="/tools">工具集</Link>,
+            //     }
+            //   ]
+            // }
           ]}
         />
       </Sider>

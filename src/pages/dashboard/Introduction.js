@@ -58,7 +58,7 @@ const Introduction = () => {
           <Space direction="vertical" size="small">
             <AreaChartOutlined style={{ fontSize: '48px', color: '#1890FF' }} />
             <Title level={2} style={{ margin: '16px 0', background: 'linear-gradient(90deg, #1890FF, #722ED1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              LLM与蜜罐日志可视化系统
+              HiveGuard智能化蜜罐可视化系统
             </Title>
             <Paragraph style={{ fontSize: '16px', maxWidth: '800px', margin: '0 auto' }}>
               一个用于监控和分析LLM（大型语言模型）请求和蜜罐活动的高级可视化平台。通过丰富的图表和直观的界面，轻松掌握系统安全态势。
