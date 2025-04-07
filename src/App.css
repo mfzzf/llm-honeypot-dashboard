@@ -20,8 +20,6 @@ body {
   z-index: 10;
 }
 
-
-
 .logo-container {
   height: 48px;
   display: flex;
@@ -230,7 +228,6 @@ pre {
   padding-top: 0;
 }
 
-
 .ant-tabs-nav.css-dev-only-do-not-override-tjsggz {
   margin: 0 !important;
   padding: 0 !important;
@@ -243,17 +240,8 @@ pre {
 /* 直接针对ant-layout组件和header组件的全局样式覆盖 */
 .ant-layout {
   background: #fff !important;
-
   margin: 0 !important;
   padding: 0 !important;
-}
-
-.ant-layout-header {
-  background: #ffffff !important;
-  padding: 0 !important;
-  height: 0px !important;
-  line-height: 0px !important;
-  margin: 0 !important;
 }
 
 /* 确保content没有边距 */
@@ -261,7 +249,7 @@ pre {
   margin: 0 !important;
   padding: 0 !important;
   margin-top: 0 !important;
-} */
+}
 
 /* 移除site-layout-background的边距 */
 .site-layout-background {

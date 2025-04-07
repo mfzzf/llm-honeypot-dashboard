@@ -6,7 +6,6 @@ import {
   QuestionCircleOutlined
 } from '@ant-design/icons';
 import SideMenu from './components/common/SideMenu';
-import Header from './components/common/Header';
 import Dashboard from './pages/dashboard/Dashboard';
 import HoneypotLogs from './pages/honeypot/HoneypotLogs';
 import LlmLogs from './pages/llm/LlmLogs';
@@ -48,7 +47,7 @@ const customTheme = {
 const contentStyle = {
   margin: 0,
   padding: 0,
-  minHeight: 'calc(100vh - 112px)', // 减去头部和底部的高度
+  minHeight: 'calc(100vh - 32px)', // 只减去底部的高度
 };
 
 const layoutStyle = {
@@ -72,7 +71,6 @@ const App = () => {
         <Layout style={layoutStyle}>
           <SideMenu />
           <Layout className="site-layout" style={{ margin: 0, padding: 0 }}>
-            <Header />
             <Content style={contentStyle}>
               <div className="site-layout-background" style={{ margin: 0, padding: 0 }}>
                 <Routes>

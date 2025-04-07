@@ -92,7 +92,7 @@ const Introduction = () => {
                 提供系统整体概览，包含LLM请求和蜜罐活动的关键指标和趋势图表。通过可视化数据，快速了解系统状态。
               </Paragraph>
               <div style={{ textAlign: 'right' }}>
-                <Button type="link" icon={<ArrowRightOutlined />}>查看详情</Button>
+                <Button type="link" icon={<ArrowRightOutlined />} href="/dashboard">查看详情</Button>
               </div>
             </Card>
           </Col>
@@ -114,7 +114,7 @@ const Introduction = () => {
                 查看LLM日志详情，分析模型使用情况、请求类型分布，以及详细的请求与响应内容。优化模型性能和安全性。
               </Paragraph>
               <div style={{ textAlign: 'right' }}>
-                <Button type="link" icon={<ArrowRightOutlined />}>查看详情</Button>
+                <Button type="link" icon={<ArrowRightOutlined />} href="/llm-logs">查看详情</Button>
               </div>
             </Card>
           </Col>
@@ -136,7 +136,7 @@ const Introduction = () => {
                 监控蜜罐活动，分析可疑IP地址，查看详细的攻击尝试记录和日志级别分布。提前发现并阻止潜在威胁。
               </Paragraph>
               <div style={{ textAlign: 'right' }}>
-                <Button type="link" icon={<ArrowRightOutlined />}>查看详情</Button>
+                <Button type="link" icon={<ArrowRightOutlined />} href="/honeypot-logs">查看详情</Button>
               </div>
             </Card>
           </Col>
