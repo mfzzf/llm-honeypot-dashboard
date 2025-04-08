@@ -212,6 +212,74 @@ export const getLlmStats = async (from, to) => {
   }
 };
 
+// 获取所有蜜罐日志(滚动搜索)
+export const getAllHoneypotLogs = async (from, to, query = '*') => {
+  try {
+    const response = await api.post('/scroll-search', {
+      index: elasticConfig.honeypotIndex,
+      body: {
+        query: {
+          bool: {
+            must: [
+              { query_string: { query } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: from,
+                    lte: to
+                  }
+                }
+              }
+            ]
+          }
+        },
+        sort: [
+          { '@timestamp': { order: 'desc' } }
+        ]
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('获取所有蜜罐日志出错:', error);
+    throw error;
+  }
+};
+
+// 获取所有LLM日志(滚动搜索)
+export const getAllLlmLogs = async (from, to, query = '*') => {
+  try {
+    const response = await api.post('/scroll-search', {
+      index: elasticConfig.llmIndex,
+      body: {
+        query: {
+          bool: {
+            must: [
+              { query_string: { query } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: from,
+                    lte: to
+                  }
+                }
+              }
+            ]
+          }
+        },
+        sort: [
+          { '@timestamp': { order: 'desc' } }
+        ]
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('获取所有LLM日志出错:', error);
+    throw error;
+  }
+};
+
 // 获取综合仪表盘数据
 export const getDashboardData = async (from, to) => {
   try {

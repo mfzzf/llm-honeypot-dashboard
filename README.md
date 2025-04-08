@@ -161,14 +161,14 @@ LLM日志存储在Elasticsearch的`llm-logs*`索引中，主要字段包括：
 ```javascript
 // Elasticsearch配置
 const elasticConfig = {
-  node: 'http://10.255.248.65:9200',
+  node: process.env.ELASTIC_NODE || 'http://10.255.248.65:9200',
   auth: {
-    username: 'elastic',
-    password: 'H3JIfzF2Ic*dbRj4c5Kd'
+    username: process.env.ELASTIC_USERNAME || 'elastic',
+    password: process.env.ELASTIC_PASSWORD || 'H3JIfzF2Ic*dbRj4c5Kd'
   },
   indices: {
-    honeypot: 'honeypot-logs*',
-    llm: 'llm-logs*'
+    honeypot: process.env.HONEYPOT_INDEX || 'honeypot-logs*',
+    llm: process.env.LLM_INDEX || 'llm-logs*'
   }
 };
 ```
@@ -178,11 +178,76 @@ const elasticConfig = {
 ```javascript
 // GPU 监控配置
 const gpuConfig = {
-  metricsUrl: 'http://10.255.248.65:9835/metrics'
+  metricsUrl: process.env.GPU_METRICS_URL || 'http://10.255.248.65:9835/metrics'
 };
 ```
 
-## 11. 前端路由结构
+## 11. Docker部署指南
+
+项目支持使用Docker进行容器化部署，提供了多阶段构建的Dockerfile以优化镜像大小和构建效率。
+
+### 11.1 构建Docker镜像
+
+在项目根目录下运行以下命令构建Docker镜像：
+
+```bash
+docker build -t llm-honeypot-dashboard:latest .
+```
+
+### 11.2 运行Docker容器
+
+使用默认配置运行容器：
+
+```bash
+docker run -d -p 3001:3001 --name llm-dashboard llm-honeypot-dashboard:latest
+```
+
+应用将在 http://localhost:3001 上可访问。
+
+### 11.3 自定义配置
+
+可以通过环境变量自定义应用配置：
+
+```bash
+docker run -d -p 3001:3001 \
+  -e ELASTIC_NODE="http://elasticsearch-host:9200" \
+  -e ELASTIC_USERNAME="your-username" \
+  -e ELASTIC_PASSWORD="your-password" \
+  -e HONEYPOT_INDEX="your-honeypot-index*" \
+  -e LLM_INDEX="your-llm-index*" \
+  -e GPU_METRICS_URL="http://gpu-metrics-host:9835/metrics" \
+  -e PORT=3001 \
+  --name llm-dashboard llm-honeypot-dashboard:latest
+```
+
+### 11.4 使用Docker Compose (可选)
+
+如果您喜欢使用Docker Compose，可以创建一个`docker-compose.yml`文件：
+
+```yaml
+version: '3'
+services:
+  llm-dashboard:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - ELASTIC_NODE=http://elasticsearch:9200
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=your-password
+      - HONEYPOT_INDEX=honeypot-logs*
+      - LLM_INDEX=llm-logs*
+      - GPU_METRICS_URL=http://gpu-metrics-host:9835/metrics
+      - PORT=3001
+```
+
+然后运行：
+
+```bash
+docker-compose up -d
+```
+
+## 12. 前端路由结构
 
 - `/` - 重定向到仪表板
 - `/dashboard` - 系统仪表板
@@ -190,7 +255,7 @@ const gpuConfig = {
 - `/llm-logs` - LLM日志查询
 - `/gpu-metrics` - GPU监控
 
-## 12. 项目依赖关系
+## 13. 项目依赖关系
 
 前端项目主要依赖于：
 - 核心库：React、React DOM、React Router
@@ -203,6 +268,6 @@ const gpuConfig = {
 - Elasticsearch客户端
 - 中间件：CORS、Body Parser
 
-## 13. 总结
+## 14. 总结
 
 LLM蜜罐日志可视化系统是一个现代化的Web应用，结合了前端React框架和后端Express服务，通过Elasticsearch进行数据存储和分析，并提供GPU监控功能。系统采用了组件化设计，清晰的服务层结构，使得数据的收集、处理和可视化变得高效而直观。

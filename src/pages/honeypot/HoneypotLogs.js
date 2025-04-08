@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Row, Col, DatePicker, Spin, Input, Tag, Button } from 'antd';
 import moment from 'moment';
-import { getHoneypotLogs } from '../../services/elasticService';
+import { getHoneypotLogs, getAllHoneypotLogs } from '../../services/elasticService';
 import { getLogLevelStats, getHoneypotIpStats, getHoneypotEventTypeStats } from '../../services/visualizationService';
 import PieChart from '../../components/charts/PieChart';
 import BarChart from '../../components/charts/BarChart';
@@ -32,10 +32,9 @@ const HoneypotLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const logsData = await getHoneypotLogs(
+        const logsData = await getAllHoneypotLogs(
           timeRange[0].toISOString(), 
           timeRange[1].toISOString(), 
-          100, 
           searchQuery
         );
         setLogs(logsData.hits.hits);

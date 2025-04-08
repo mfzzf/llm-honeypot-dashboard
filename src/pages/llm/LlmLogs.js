@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Row, Col, DatePicker, Spin, Button, Input, Tag } from 'antd';
 import moment from 'moment';
-import { getLlmLogs } from '../../services/elasticService';
+import { getLlmLogs, getAllLlmLogs } from '../../services/elasticService';
 import { getLlmModelStats, getLlmRequestTypeStats, getLlmEventTypeStats, getLlmStatusStats } from '../../services/visualizationService';
 import PieChart from '../../components/charts/PieChart';
 import BarChart from '../../components/charts/BarChart';
@@ -33,10 +33,9 @@ const LlmLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const logsData = await getLlmLogs(
+        const logsData = await getAllLlmLogs(
           timeRange[0].toISOString(), 
           timeRange[1].toISOString(), 
-          100, 
           searchQuery
         );
         setLogs(logsData.hits.hits);

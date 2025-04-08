@@ -86,7 +86,7 @@ const tabContentStyle = {
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState([
-    moment().subtract(7, 'days'),
+    moment().subtract(30, 'days'),
     moment()
   ]);
   const [honeypotLogs, setHoneypotLogs] = useState([]);
