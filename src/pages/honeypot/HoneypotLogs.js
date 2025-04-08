@@ -20,6 +20,12 @@ const HoneypotLogs = () => {
   const [levelFilter, setLevelFilter] = useState(null);
   const [ipFilter, setIpFilter] = useState(null);
   const [eventTypeFilter, setEventTypeFilter] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    pageSizeOptions: ['10', '20', '50', '100'],
+    showSizeChanger: true
+  });
 
   // 加载数据
   useEffect(() => {
@@ -197,6 +203,11 @@ const HoneypotLogs = () => {
     );
   };
 
+  // 处理表格分页变化
+  const handleTableChange = (paginationConfig, filters, sorter) => {
+    setPagination(paginationConfig);
+  };
+
   return (
     <div className="honeypot-logs-container">
       <div className="page-header">
@@ -282,7 +293,8 @@ const HoneypotLogs = () => {
               columns={columns}
               dataSource={tableData}
               expandable={{ expandedRowRender }}
-              pagination={{ pageSize: 10 }}
+              pagination={pagination}
+              onChange={handleTableChange}
               rowKey="key"
             />
           </Card>

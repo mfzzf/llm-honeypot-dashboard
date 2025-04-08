@@ -21,6 +21,12 @@ const LlmLogs = () => {
   const [modelFilter, setModelFilter] = useState(null);
   const [eventTypeFilter, setEventTypeFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    pageSizeOptions: ['10', '20', '50', '100'],
+    showSizeChanger: true
+  });
 
   // 加载数据
   useEffect(() => {
@@ -229,6 +235,11 @@ const LlmLogs = () => {
     );
   };
 
+  // 处理表格分页变化
+  const handleTableChange = (paginationConfig, filters, sorter) => {
+    setPagination(paginationConfig);
+  };
+
   return (
     <div className="llm-logs-container">
       <div className="page-header">
@@ -277,7 +288,7 @@ const LlmLogs = () => {
       ) : (
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-            <Col span={12}>
+            <Col span={6}>
               <Card title={`LLM请求类型分布 ${typeFilter ? `(已筛选: ${typeFilter})` : ''}`}>
                 <BarChart
                   title="LLM请求类型"
@@ -288,7 +299,7 @@ const LlmLogs = () => {
                 />
               </Card>
             </Col>
-            <Col span={12}>
+            <Col span={6}>
               <Card title={`LLM模型使用分布 ${modelFilter ? `(已筛选: ${modelFilter})` : ''}`}>
                 <PieChart
                   title="模型使用统计"
@@ -300,10 +311,7 @@ const LlmLogs = () => {
                 />
               </Card>
             </Col>
-          </Row>
-          
-          <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-            <Col span={12}>
+            <Col span={6}>
               <Card title={`LLM事件类型分布 ${eventTypeFilter ? `(已筛选: ${eventTypeFilter})` : ''}`}>
                 <PieChart
                   title="事件类型统计"
@@ -315,7 +323,7 @@ const LlmLogs = () => {
                 />
               </Card>
             </Col>
-            <Col span={12}>
+            <Col span={6}>
               <Card title={`LLM状态分布 ${statusFilter ? `(已筛选: ${statusFilter})` : ''}`}>
                 <PieChart
                   title="状态统计"
@@ -334,7 +342,8 @@ const LlmLogs = () => {
               columns={columns}
               dataSource={tableData}
               expandable={{ expandedRowRender }}
-              pagination={{ pageSize: 10 }}
+              pagination={pagination}
+              onChange={handleTableChange}
               rowKey="key"
             />
           </Card>

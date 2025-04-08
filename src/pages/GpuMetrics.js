@@ -10,18 +10,22 @@ import {
   Badge, 
   Space, 
   Divider,
-  Tag
+  Tag,
+  Button,
+  Tooltip,
+  message
 } from 'antd';
 import {
   ThunderboltOutlined,
-  DashboardOutlined,
   HeatMapOutlined,
   BarChartOutlined,
   DatabaseOutlined,
-  SyncOutlined
+  SyncOutlined,
+  ClearOutlined
 } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
 import { getGpuMetrics, parseGpuMetrics } from '../services/gpuService';
+import { loadGpuHistoryData, saveGpuHistoryData, clearGpuHistoryData, getHistoryStorageSize } from '../lib/storageUtils';
 
 const { Title, Text } = Typography;
 
@@ -43,95 +47,79 @@ const GpuCard = ({ gpu, index }) => {
   const powerColor = getStatusColor(gpu.power.draw / gpu.power.limit * 100, { warning: 75, critical: 90 });
   const gpuUtilColor = getStatusColor(gpu.utilization.gpu);
   const memUtilColor = getStatusColor(memoryUtilization);
-  
+
+  const progressSize = 100; // Size for dashboard progress
+
   return (
     <Card 
       title={
         <Space>
           <Badge status={gpu.utilization.gpu > 50 ? "processing" : "default"} />
-          <Text strong>{`GPU ${index + 1}: ${gpu.name}`}</Text>
+          <Text strong>{`GPU ${index}: ${gpu.name}`}</Text>
         </Space>
       }
-      bordered={true}
+      bordered={false}
       hoverable
       className="gpu-card"
       extra={<Tag color="blue">{`${memoryTotal} MB`}</Tag>}
     >
-      <Row gutter={[16, 24]}>
-        {/* 温度和功耗 */}
-        <Col span={12}>
-          <Card bordered={false} size="small" className="metric-card">
-            <Statistic
-              title={<Space><HeatMapOutlined /> 温度</Space>}
-              value={gpu.temperature}
-              suffix="°C"
-              valueStyle={{ color: tempColor, fontSize: '24px' }}
-            />
-          </Card>
+      <Row gutter={[16, 16]} align="middle">
+        {/* 温度和功耗 - Side by side */}
+        <Col xs={24} sm={12} md={24} lg={12} style={{ textAlign: 'center' }}>
+          <Statistic
+            title={<Space><HeatMapOutlined /> 温度</Space>}
+            value={gpu.temperature}
+            suffix="°C"
+            valueStyle={{ color: tempColor, fontSize: '20px', fontWeight: 500 }}
+          />
         </Col>
-        <Col span={12}>
-          <Card bordered={false} size="small" className="metric-card">
-            <Statistic
-              title={<Space><ThunderboltOutlined /> 功耗</Space>}
-              value={gpu.power.draw}
-              suffix="W"
-              precision={1}
-              valueStyle={{ color: powerColor, fontSize: '24px' }}
-            />
-          </Card>
+        <Col xs={24} sm={12} md={24} lg={12} style={{ textAlign: 'center' }}>
+          <Statistic
+            title={<Space><ThunderboltOutlined /> 功耗</Space>}
+            value={gpu.power.draw}
+            suffix={`/ ${gpu.power.limit} W`}
+            precision={1}
+            valueStyle={{ color: powerColor, fontSize: '20px', fontWeight: 500 }}
+          />
         </Col>
-        
-        {/* GPU 利用率 */}
-        <Col span={24}>
-          <div className="progress-container">
-            <div className="progress-header">
-              <Space>
-                <BarChartOutlined />
-                <Text>GPU 利用率</Text>
-              </Space>
-              <Text strong style={{ color: gpuUtilColor }}>{`${gpu.utilization.gpu}%`}</Text>
-            </div>
-            <Progress 
-              percent={gpu.utilization.gpu} 
-              strokeColor={gpuUtilColor}
-              size="small"
-              showInfo={false}
-              trailColor="#f0f2f5"
-              strokeLinecap="round"
-            />
-          </div>
+
+        <Col span={24}><Divider style={{ margin: '12px 0'}} /></Col>
+
+        {/* GPU 利用率 - Dashboard Progress */}
+        <Col xs={12} style={{ textAlign: 'center' }}>
+          <Text type="secondary" style={{ marginBottom: 8, display: 'block' }}>
+            <BarChartOutlined /> GPU Util
+          </Text>
+          <Progress 
+            type="dashboard"
+            percent={gpu.utilization.gpu} 
+            strokeColor={gpuUtilColor}
+            size={progressSize}
+            format={(percent) => `${percent}%`}
+            strokeWidth={8}
+          />
         </Col>
         
-        {/* 显存利用率 */}
-        <Col span={24}>
-          <div className="progress-container">
-            <div className="progress-header">
-              <Space>
-                <DatabaseOutlined />
-                <Text>显存利用率</Text>
-              </Space>
-              <Text strong style={{ color: memUtilColor }}>{`${memoryUtilization}%`}</Text>
-            </div>
-            <Progress 
-              percent={memoryUtilization} 
-              strokeColor={memUtilColor}
-              size="small"
-              showInfo={false}
-              trailColor="#f0f2f5"
-              strokeLinecap="round"
-            />
-          </div>
+        {/* 显存利用率 - Dashboard Progress */}
+        <Col xs={12} style={{ textAlign: 'center' }}>
+          <Text type="secondary" style={{ marginBottom: 8, display: 'block' }}>
+            <DatabaseOutlined /> Mem Util
+          </Text>
+          <Progress 
+            type="dashboard"
+            percent={memoryUtilization} 
+            strokeColor={memUtilColor}
+            size={progressSize}
+            format={(percent) => `${percent}%`}
+            strokeWidth={8}
+          />
         </Col>
-        
-        {/* 显存使用 */}
-        <Col span={24}>
-          <div className="memory-usage">
-            <Text type="secondary">显存使用</Text>
-            <div className="memory-value">
-              <Text strong>{`${memoryUsed}`}</Text>
-              <Text type="secondary">{` / ${memoryTotal} MB`}</Text>
-            </div>
-          </div>
+
+        {/* 显存使用 - Below progress bars */}
+        <Col span={24} style={{ marginTop: '16px', textAlign: 'center'}}>
+          <Text type="secondary">显存使用:</Text>
+          <Text strong style={{ marginLeft: 8 }}>{`${memoryUsed} MB`}</Text>
+          <Text type="secondary">{` / ${memoryTotal} MB`}</Text>
         </Col>
       </Row>
     </Card>
@@ -144,8 +132,22 @@ const GpuMetrics = () => {
   const [error, setError] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
   useEffect(() => {
+    // 从localStorage加载历史数据
+    const savedHistoryData = loadGpuHistoryData();
+    if (savedHistoryData && savedHistoryData.length > 0) {
+      setHistoryData(savedHistoryData);
+      setInitialDataLoaded(true);
+      
+      // 如果有历史数据，也设置一个上次更新时间（使用最新记录的时间戳）
+      const timestamps = [...new Set(savedHistoryData.map(item => item.timestamp))];
+      if (timestamps.length > 0) {
+        setLastUpdated(timestamps[timestamps.length - 1]);
+      }
+    }
+
     const fetchData = async () => {
       try {
         const metrics = await getGpuMetrics();
@@ -165,10 +167,20 @@ const GpuMetrics = () => {
         }));
         
         setHistoryData(prev => {
+          // 合并现有数据和新数据
           const updated = [...prev, ...newHistoryData];
-          // 只保留最近30个数据点
-          return updated.slice(-30 * parsedData.gpus.length);
+          // 只保留最近30个数据点（每个GPU）
+          const maxPoints = 30 * parsedData.gpus.length;
+          const trimmedData = updated.slice(-maxPoints);
+          
+          // 将更新后的数据保存到localStorage
+          saveGpuHistoryData(trimmedData);
+          
+          return trimmedData;
         });
+        
+        // 数据加载成功，设置初始加载完成标志
+        setInitialDataLoaded(true);
       } catch (err) {
         setError(err.message);
         console.error('获取GPU数据失败:', err);
@@ -183,46 +195,152 @@ const GpuMetrics = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // 清除历史数据
+  const handleClearHistory = () => {
+    clearGpuHistoryData();
+    setHistoryData([]);
+    message.success('历史数据已清除');
+  };
+
   const getChartOption = (title, dataKey, yAxisTitle, colorMap = {}) => {
+    // 如果没有历史数据或GPU数据，则返回基本图表配置
+    if (!historyData.length || !gpuData) {
+      const emptyOption = {
+        title: {
+          text: title,
+          left: 'center',
+          textStyle: {
+            fontWeight: 'normal',
+            fontSize: 16,
+            color: '#595959'
+          }
+        },
+        tooltip: {
+          show: false
+        },
+        xAxis: {
+          type: 'category',
+          data: []
+        },
+        yAxis: {
+          type: 'value',
+          name: yAxisTitle
+        },
+        series: []
+      };
+      
+      // 如果有历史数据但没有GPU数据
+      if (historyData.length && !gpuData) {
+        // 提取GPU索引和时间戳
+        const gpuIndices = [...new Set(historyData.map(item => item.gpuIndex))];
+        const timestamps = [...new Set(historyData.map(item => item.timestamp))];
+        
+        // 使用Ant Design颜色
+        const antColors = [
+          '#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#13c2c2', '#eb2f96', '#fa8c16',
+        ];
+        
+        emptyOption.xAxis.data = timestamps;
+        emptyOption.tooltip.show = true;
+        emptyOption.series = gpuIndices.map((gpuIndex, index) => {
+          const color = colorMap[index] || antColors[index % antColors.length];
+          
+          return {
+            name: `GPU ${gpuIndex}`,
+            type: 'line',
+            smooth: true,
+            showSymbol: false,
+            symbol: 'circle',
+            symbolSize: 8,
+            lineStyle: {
+              width: 2.5,
+              color: color
+            },
+            itemStyle: {
+              color: color,
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 0, y2: 1,
+                colorStops: [
+                  { offset: 0, color: color + 'B3' },
+                  { offset: 1, color: color + '1A' }
+                ]
+              },
+              opacity: 1
+            },
+            data: historyData
+              .filter(item => item.gpuIndex === gpuIndex)
+              .map(item => [item.timestamp, item[dataKey]])
+          };
+        });
+      }
+      
+      return emptyOption;
+    }
+
+    // 1. 更新颜色方案 (使用 Ant Design 色彩)
+    const antColors = [
+      '#1890ff', // blue-6
+      '#52c41a', // green-6
+      '#faad14', // gold-6
+      '#f5222d', // red-6
+      '#722ed1', // purple-6
+      '#13c2c2', // cyan-6
+      '#eb2f96', // magenta-6
+      '#fa8c16', // orange-6
+    ];
+    
     const series = gpuData?.gpus.map((gpu, index) => {
-      // 为每个GPU分配一个唯一的颜色
-      const colors = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#eb2f96'];
-      const color = colorMap[index] || colors[index % colors.length];
+      const color = colorMap[index] || antColors[index % antColors.length];
       
       return {
-        name: `GPU ${index + 1}`,
+        name: `GPU ${index}`,
         type: 'line',
         smooth: true,
+        // 3. 调整标记点样式: 默认隐藏
+        showSymbol: false, 
         symbol: 'circle',
-        symbolSize: 6,
+        symbolSize: 8, // 稍微增大悬停时的大小
         lineStyle: {
-          width: 3,
+          // 2. 优化线条样式 (略微加粗)
+          width: 2.5,
           color: color
         },
         itemStyle: {
-          color: color
+          // 用于图例标记颜色
+          color: color,
         },
+        // 2. 优化区域样式 (更平滑的渐变)
         areaStyle: {
           color: {
             type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
+            x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              {
-                offset: 0,
-                color: color + '80' // 添加透明度
-              },
-              {
-                offset: 1,
-                color: color + '10'
-              }
+              { offset: 0, color: color + 'B3' }, // 70% opacity
+              { offset: 1, color: color + '1A' }  // 10% opacity
             ]
-          }
+          },
+          opacity: 1 // 使用渐变本身的透明度
         },
         emphasis: {
-          focus: 'series'
+          focus: 'series',
+          // 3. 调整标记点样式: 悬停时显示并突出
+          symbolSize: 10,
+          itemStyle: {
+             color: color,
+             borderColor: '#fff',
+             borderWidth: 2,
+             shadowColor: 'rgba(0, 0, 0, 0.2)',
+             shadowBlur: 5
+          },
+          lineStyle: {
+            width: 3.5, // 悬停时线条加粗
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            shadowBlur: 5,
+            shadowOffsetY: 2
+          }
         },
         data: historyData
           .filter(item => item.gpuIndex === index)
@@ -236,54 +354,107 @@ const GpuMetrics = () => {
         left: 'center',
         textStyle: {
           fontWeight: 'normal',
-          fontSize: 16
+          fontSize: 16,
+          color: '#595959' // 稍深的灰色
         }
       },
+      // 4 & 5. 改进 Tooltip 外观和格式
       tooltip: {
         trigger: 'axis',
         axisPointer: {
           type: 'cross',
           label: {
             backgroundColor: '#6a7985'
+          },
+          lineStyle: {
+             color: '#ccc',
+             type: 'dashed'
           }
+        },
+        backgroundColor: 'rgba(255, 255, 255, 0.98)', // 更接近白色，略透明
+        borderColor: '#e8e8e8', // 更浅的边框
+        borderWidth: 1,
+        borderRadius: 6, // 圆角
+        padding: [8, 12], // 内边距
+        textStyle: {
+          color: '#333',
+          fontSize: 13
+        },
+        extraCssText: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border: none;', // 阴影，移除默认边框
+        // 5. 优化 Tooltip 内容格式
+        formatter: (params) => {
+          if (!params || params.length === 0) return '';
+          let tooltipText = `${params[0].axisValueLabel}<br/>`; // 时间戳
+          params.forEach(item => {
+            const colorCircle = `<span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${item.color};"></span>`;
+            const value = typeof item.value[1] === 'number' ? item.value[1].toFixed(1) : '-'; // 保留一位小数
+            const unit = yAxisTitle.includes('°C') ? '°C' : yAxisTitle.includes('(W)') ? 'W' : '%'; // 简单判断单位
+            tooltipText += `${colorCircle}${item.seriesName}: <strong>${value} ${unit}</strong><br/>`;
+          });
+          return tooltipText;
         }
       },
+      // 7. 微调图例样式
       legend: {
-        data: gpuData?.gpus.map((_, index) => `GPU ${index + 1}`),
-        top: 30
+        data: gpuData?.gpus.map((_, index) => `GPU ${index}`),
+        top: 35,
+        itemGap: 20, // 增大间距
+        textStyle: {
+           color: '#595959'
+        },
+        icon: 'circle' // 使用圆形图例标记
       },
+      // 8. 调整网格边距 & 6. 简化坐标轴和网格
       grid: {
-        left: '3%',
-        right: '4%',
+        left: '2%',
+        right: '5%', // 为 Y 轴名称留出更多空间
         bottom: '3%',
+        top: '22%', // 为图例和标题留出空间
         containLabel: true
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
         data: [...new Set(historyData.map(item => item.timestamp))],
+        // 6. 简化坐标轴
         axisLine: {
+          show: true,
           lineStyle: {
-            color: '#aaa'
+            color: '#e8e8e8' // 更浅的轴线
           }
+        },
+        axisTick: {
+           show: false
+        },
+        axisLabel: {
+           color: '#8c8c8c' // 稍浅的标签颜色
         }
       },
       yAxis: {
         type: 'value',
         name: yAxisTitle,
         nameLocation: 'middle',
-        nameGap: 40,
+        nameGap: 45, // 调整名称间距
         nameTextStyle: {
-          color: '#666'
+          color: '#8c8c8c',
+          fontSize: 12,
+          fontWeight: 'normal'
         },
+        // 6. 简化坐标轴
         axisLine: {
-          lineStyle: {
-            color: '#aaa'
-          }
+          show: false // 隐藏 Y 轴轴线
         },
+         axisTick: {
+           show: false
+        },
+        axisLabel: {
+           color: '#8c8c8c'
+        },
+        // 6. 简化网格线
         splitLine: {
           lineStyle: {
-            color: '#eee'
+            color: '#f0f0f0', // 非常浅的网格线
+            type: 'dashed'
           }
         }
       },
@@ -291,19 +462,37 @@ const GpuMetrics = () => {
     };
   };
 
-  if (loading) {
+  if (loading && !initialDataLoaded) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
         <Spin size="large" />
+        <div style={{ marginTop: '16px' }}>
+          <Text type="secondary">正在加载GPU数据，请稍候...</Text>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !initialDataLoaded) {
     return (
       <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>
         <Title level={2}>获取GPU数据失败</Title>
         <Text type="danger">{error}</Text>
+      </div>
+    );
+  }
+
+  // 即使正在加载或有错误，但如果已有历史数据，仍然显示页面
+  // 但仅显示历史图表部分，不显示实时GPU卡片（因为这些需要最新数据）
+  const showGpuCards = gpuData && gpuData.gpus && gpuData.gpus.length > 0;
+  const showCharts = historyData && historyData.length > 0;
+
+  // 如果既没有GPU卡片可显示，又没有图表可显示，则显示空状态
+  if (!showGpuCards && !showCharts) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Title level={2}>暂无GPU数据</Title>
+        <Text type="secondary">正在等待数据采集，请稍候...</Text>
       </div>
     );
   }
@@ -316,60 +505,76 @@ const GpuMetrics = () => {
         </Col>
         <Col>
           <Space>
-            <SyncOutlined spin={loading} />
+            {loading && <SyncOutlined spin />}
             <Text type="secondary">
               {lastUpdated ? `上次更新: ${lastUpdated}` : '等待数据...'}
             </Text>
+            {historyData.length > 0 && (
+              <Tooltip title="清除存储的历史数据">
+                <Button 
+                  icon={<ClearOutlined />} 
+                  size="small" 
+                  onClick={handleClearHistory}
+                  style={{ marginLeft: 8 }}
+                >
+                  清除历史
+                </Button>
+              </Tooltip>
+            )}
           </Space>
         </Col>
       </Row>
 
-      {/* GPU 卡片网格 */}
-      <Row gutter={[16, 16]} className="gpu-cards-grid">
-        {gpuData?.gpus.map((gpu, index) => (
-          <Col xs={24} sm={24} md={12} lg={8} key={gpu.uuid}>
-            <GpuCard gpu={gpu} index={index} />
+      {/* GPU 卡片网格 - 仅在有最新数据时显示 */}
+      {showGpuCards && (
+        <Row gutter={[16, 16]} className="gpu-cards-grid">
+          {gpuData.gpus.map((gpu, index) => (
+            <Col xs={24} sm={24} md={12} lg={8} key={gpu.uuid}>
+              <GpuCard gpu={gpu} index={index} />
+            </Col>
+          ))}
+        </Row>
+      )}
+
+      {showGpuCards && <Divider />}
+
+      {/* 图表网格布局 - 即使没有最新数据，也可以基于历史数据显示 */}
+      {showCharts && (
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          <Col xs={24} sm={24} md={12}>
+            <Card bordered={false} className="chart-card">
+              <ReactECharts
+                option={getChartOption('GPU 温度变化', 'temperature', '温度 (°C)')}
+                style={{ width: '100%', height: '350px' }}
+              />
+            </Card>
           </Col>
-        ))}
-      </Row>
-
-      <Divider />
-
-      {/* 图表网格布局 */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        <Col xs={24} sm={24} md={12}>
-          <Card bordered={false} className="chart-card">
-            <ReactECharts
-              option={getChartOption('GPU 温度变化', 'temperature', '温度 (°C)')}
-              style={{ width: '100%', height: '350px' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={24} md={12}>
-          <Card bordered={false} className="chart-card">
-            <ReactECharts
-              option={getChartOption('GPU 功耗变化', 'power', '功耗 (W)')}
-              style={{ width: '100%', height: '350px' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={24} md={12}>
-          <Card bordered={false} className="chart-card">
-            <ReactECharts
-              option={getChartOption('GPU 利用率变化', 'gpuUtilization', '利用率 (%)')}
-              style={{ width: '100%', height: '350px' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={24} md={12}>
-          <Card bordered={false} className="chart-card">
-            <ReactECharts
-              option={getChartOption('显存利用率变化', 'memoryUtilization', '利用率 (%)')}
-              style={{ width: '100%', height: '350px' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+          <Col xs={24} sm={24} md={12}>
+            <Card bordered={false} className="chart-card">
+              <ReactECharts
+                option={getChartOption('GPU 功耗变化', 'power', '功耗 (W)')}
+                style={{ width: '100%', height: '350px' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={24} md={12}>
+            <Card bordered={false} className="chart-card">
+              <ReactECharts
+                option={getChartOption('GPU 利用率变化', 'gpuUtilization', '利用率 (%)')}
+                style={{ width: '100%', height: '350px' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={24} md={12}>
+            <Card bordered={false} className="chart-card">
+              <ReactECharts
+                option={getChartOption('显存利用率变化', 'memoryUtilization', '利用率 (%)')}
+                style={{ width: '100%', height: '350px' }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
     </div>
   );
 };
@@ -379,48 +584,46 @@ const style = document.createElement('style');
 style.textContent = `
   .gpu-card {
     height: 100%;
-    transition: all 0.3s;
-    box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16), 
-                0 3px 6px 0 rgba(0, 0, 0, 0.12), 
-                0 5px 12px 4px rgba(0, 0, 0, 0.09);
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #fff;
+    padding: 16px !important;
   }
   
   .gpu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.16), 
-                0 6px 16px 0 rgba(0, 0, 0, 0.12), 
-                0 9px 28px 8px rgba(0, 0, 0, 0.09);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    border-color: #1890ff;
   }
   
-  .metric-card {
-    background-color: #fafafa;
-    border-radius: 8px;
-  }
-  
-  .progress-container {
-    margin-bottom: 12px;
-  }
-  
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
+  .gpu-card .ant-progress-dashboard-text {
+      font-size: 1.1em !important;
+      font-weight: 500;
   }
   
   .memory-usage {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .memory-value {
-    display: flex;
-    align-items: center;
+    display: block;
+    text-align: center;
+    margin-top: 10px;
   }
   
   .chart-card {
     border-radius: 8px;
-    box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16);
+    border: 1px solid #d9d9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #fff;
+    padding: 16px;
+  }
+  
+  .chart-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    border-color: #1890ff;
+  }
+  
+  .chart-card .echarts-for-react {
+    width: 100% !important; 
   }
 `;
 document.head.appendChild(style);
