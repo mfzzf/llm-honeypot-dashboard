@@ -90,8 +90,9 @@ app.get('/api/elasticsearch/indices', async (req, res) => {
 // 滚动搜索路由 - 获取所有日志
 app.post('/api/elasticsearch/scroll-search', async (req, res) => {
   try {
-    const { index, body, scrollTime = '1m' } = req.body;
+    const { index, body, scrollTime = '1m', maxResults = 10000 } = req.body;
     let allResults = [];
+    let scrollId = null;
     
     // 设置初始滚动搜索
     let response = await client.search({
@@ -102,24 +103,31 @@ app.post('/api/elasticsearch/scroll-search', async (req, res) => {
     
     // 收集第一批结果
     allResults = [...response.hits.hits];
+    scrollId = response._scroll_id;
     
-    // 继续滚动直到没有更多结果
-    while (response.hits.hits && response.hits.hits.length > 0) {
-      response = await client.scroll({
-        scroll_id: response._scroll_id,
-        scroll: scrollTime
-      });
-      
-      if (response.hits.hits && response.hits.hits.length > 0) {
-        allResults = [...allResults, ...response.hits.hits];
+    // 继续滚动直到没有更多结果或达到最大结果数
+    while (response.hits.hits && response.hits.hits.length > 0 && allResults.length < maxResults) {
+      try {
+        response = await client.scroll({
+          scroll_id: scrollId,
+          scroll: scrollTime
+        });
+        
+        if (response.hits.hits && response.hits.hits.length > 0) {
+          allResults = [...allResults, ...response.hits.hits];
+        }
+      } catch (scrollError) {
+        console.error('滚动搜索过程中出错:', scrollError);
+        // 继续处理已获取的结果，而不是完全失败
+        break;
       }
     }
     
     // 清理滚动上下文
     try {
-      if (response._scroll_id) {
+      if (scrollId) {
         await client.clearScroll({ 
-          scroll_id: response._scroll_id 
+          scroll_id: scrollId 
         });
       }
     } catch (clearError) {

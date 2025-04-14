@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Spin, DatePicker, Statistic, Tabs, Badge, Button, Typography } from 'antd';
+import { Row, Col, Card, Spin, DatePicker, Statistic, Tabs, Badge, Button, Typography, Select } from 'antd';
 import { 
   LineChartOutlined, 
   BarChartOutlined, 
@@ -16,7 +16,9 @@ import {
   getHoneypotLogs, 
   getLlmLogs, 
   getHoneypotStats, 
-  getLlmStats 
+  getLlmStats,
+  getAllHoneypotLogs,
+  getAllLlmLogs
 } from '../../services/elasticService';
 import {
   processTimeSeriesData,
@@ -94,6 +96,7 @@ const Dashboard = () => {
   const [honeypotStats, setHoneypotStats] = useState(null);
   const [llmStats, setLlmStats] = useState(null);
   const [activeTab, setActiveTab] = useState('1');
+  const [dataLimit, setDataLimit] = useState('100'); // 默认数据量限制
 
   // 加载数据
   useEffect(() => {
@@ -104,9 +107,25 @@ const Dashboard = () => {
       
       setLoading(true);
       try {
-        const [honeypotLogsData, llmLogsData, honeypotStatsData, llmStatsData] = await Promise.all([
-          getHoneypotLogs(timeRange[0].toISOString(), timeRange[1].toISOString(), 100),
-          getLlmLogs(timeRange[0].toISOString(), timeRange[1].toISOString(), 100),
+        // 根据选择的数据量限制调用不同的API
+        let honeypotLogsData, llmLogsData;
+        
+        if (dataLimit === 'all') {
+          // 使用滚动搜索获取所有数据
+          [honeypotLogsData, llmLogsData] = await Promise.all([
+            getAllHoneypotLogs(timeRange[0].toISOString(), timeRange[1].toISOString()),
+            getAllLlmLogs(timeRange[0].toISOString(), timeRange[1].toISOString())
+          ]);
+        } else {
+          // 使用普通搜索获取指定数量的数据
+          [honeypotLogsData, llmLogsData] = await Promise.all([
+            getHoneypotLogs(timeRange[0].toISOString(), timeRange[1].toISOString(), parseInt(dataLimit)),
+            getLlmLogs(timeRange[0].toISOString(), timeRange[1].toISOString(), parseInt(dataLimit))
+          ]);
+        }
+        
+        // 获取统计信息
+        const [honeypotStatsData, llmStatsData] = await Promise.all([
           getHoneypotStats(timeRange[0].toISOString(), timeRange[1].toISOString()),
           getLlmStats(timeRange[0].toISOString(), timeRange[1].toISOString())
         ]);
@@ -123,7 +142,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [timeRange, activeTab]);
+  }, [timeRange, activeTab, dataLimit]);
 
   const handleTimeRangeChange = (dates) => {
     if (dates && dates.length === 2) {
@@ -133,6 +152,10 @@ const Dashboard = () => {
 
   const handleTabChange = (key) => {
     setActiveTab(key);
+  };
+
+  const handleDataLimitChange = (value) => {
+    setDataLimit(value);
   };
 
   // 处理蜜罐时间序列数据
@@ -188,8 +211,19 @@ const Dashboard = () => {
           <Title level={2} style={{ margin: 0 }}>系统仪表盘</Title>
           <Text type="secondary">实时监控大数据安全态势</Text>
         </div>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <Badge count="实时" style={{ backgroundColor: '#52C41A', marginRight: '12px' }} />
+          <Select
+            value={dataLimit}
+            onChange={handleDataLimitChange}
+            style={{ width: 120, marginRight: '12px' }}
+            options={[
+              { value: '100', label: '100条数据' },
+              { value: '500', label: '500条数据' },
+              { value: '1000', label: '1000条数据' },
+              { value: 'all', label: '全部数据' }
+            ]}
+          />
           <RangePicker
             ranges={{
               '最近24小时': [moment().subtract(24, 'hours'), moment()],

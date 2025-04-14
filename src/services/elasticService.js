@@ -213,7 +213,7 @@ export const getLlmStats = async (from, to) => {
 };
 
 // 获取所有蜜罐日志(滚动搜索)
-export const getAllHoneypotLogs = async (from, to, query = '*') => {
+export const getAllHoneypotLogs = async (from, to, query = '*', maxResults = 10000) => {
   try {
     const response = await api.post('/scroll-search', {
       index: elasticConfig.honeypotIndex,
@@ -236,7 +236,8 @@ export const getAllHoneypotLogs = async (from, to, query = '*') => {
         sort: [
           { '@timestamp': { order: 'desc' } }
         ]
-      }
+      },
+      maxResults
     });
     
     return response.data;
@@ -247,7 +248,7 @@ export const getAllHoneypotLogs = async (from, to, query = '*') => {
 };
 
 // 获取所有LLM日志(滚动搜索)
-export const getAllLlmLogs = async (from, to, query = '*') => {
+export const getAllLlmLogs = async (from, to, query = '*', maxResults = 10000) => {
   try {
     const response = await api.post('/scroll-search', {
       index: elasticConfig.llmIndex,
@@ -270,7 +271,8 @@ export const getAllLlmLogs = async (from, to, query = '*') => {
         sort: [
           { '@timestamp': { order: 'desc' } }
         ]
-      }
+      },
+      maxResults
     });
     
     return response.data;
